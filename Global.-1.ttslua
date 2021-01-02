@@ -13,8 +13,8 @@ blueCounterGUID = "c44d44"
 purpleCounterGUID = "65b4d9"
 pinkCounterGUID = "80d397"
 
-logToAll = true
-minPlayerNumber = 2
+logToAll = false
+minPlayerNumber = 1
 tricks = {}
 points = {}
 bids = {}
@@ -44,7 +44,6 @@ end
 
 function setTricksToZero()
     for i = 1, numberOfPlayers, 1 do
-        --playerList[i].tricks = 0 --geht so anscheinend nicht
         tricks[i] = 0
     end
     tricksTotal = 0
@@ -165,6 +164,7 @@ function startRound()
     deck.deal(round)
     -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
     local deckPos = deck.getPosition()
+    log(deckPos, "Deckposition")
     deck.takeObject({flip = true, position = deckPos})
     waitForTrump()
     bidRound = true
@@ -172,14 +172,12 @@ end
 
 function setPointsToZero()
     for i = 1, numberOfPlayers, 1 do
-        --playerList[i].tricks = 0 --geht so anscheinend nicht
         points[i] = 0
     end
 end
 
 function countPoints()
   for i = 1, numberOfPlayers, 1 do
-      --playerList[i].tricks = 0 --geht so anscheinend nicht
       if bids[i] == tricks[i] then
           points[i] = 20 + 10 * tricks[i] + points[i]
       else
@@ -189,12 +187,29 @@ function countPoints()
   end
 end
 
+function collectCards(callback)
+    local allObjects = getAllObjects()
+    local allCards = {}
+    for _, item in ipairs(allObjects) do
+        if item.tag == "Card" or item.tag == "Deck" then
+            table.insert(allCards, item)
+        end
+    end
+    log(allCards, "Var allCards")
+    local allCardsDeck = group(allCards)
+    log(allCardsDeck, "1 Var allCardsDeck")
+    Wait.time(function()
+        log(allCardsDeck, "2 Var allCardsDeck")
+        allCardsDeck.setPositionSmooth(Table, bool, bool) --HIER WEITERMACHEN, NOCH FEHLER
+        callback()
+    end, 3)
+end
+
 function endRound()
     countPoints()
-    --collectCards()
     startPlayerNumber = startPlayerNumber % numberOfPlayers + 1
     startPlayerRound = playerList[startPlayerNumber]
-    startRound()
+    collectCards(startRound)
 end
 
 function countTricks()
@@ -203,7 +218,7 @@ function countTricks()
     log(tricks[bestCardPlayerNumber], "Anzahl Stiche des Spielers, der Stich gewinnt")
     tricksTotal = tricksTotal + 1
     if tricksTotal == round then
-        endRound()
+        Wait.time(endRound, 3)
     end
 end
 
@@ -222,7 +237,6 @@ function endTrick()
             end
         end
     end, 1)
-    --bestCardPlayer.tricks = bestCardPlayer.tricks+1 --SIEHE OBEN
     countTricks()
     startPlayerTrick = bestCardPlayer
     activePlayer = bestCardPlayer
@@ -286,6 +300,12 @@ function betterValue(droppedCard)
   end
 end
 
+function lockPlayedCard(droppedCard)
+    droppedCard.setLock(true)
+    local position = droppedCard.getPosition()
+    droppedCard.setPositionSmooth({position.x, 1, position.z}, true, false)
+end
+
 function onObjectDrop(droppingPlayer, droppedCard)
 
     local playZoneObjects = playZone.getObjects()
@@ -299,6 +319,9 @@ function onObjectDrop(droppingPlayer, droppedCard)
             --Wenn noch die Stiche geboten werden müssen
             if bidRound == true then
                 broadcastToAll("Ihr müsst noch eure Stiche angeben!", "Red")
+                droppedCard.deal(1, droppingPlayer)
+
+            --Wenn schon geboten wurde
             else
 
                 --log(item, "Karte in Zone gedropped", "Ausspielen")
@@ -310,36 +333,44 @@ function onObjectDrop(droppingPlayer, droppedCard)
                     logToAllOrHost("Du (Spieler "..droppingPlayer..") bist nicht dran! Spieler "..activePlayer.." ist am Zug")
                     droppedCard.deal(1, droppingPlayer)
 
-                --Ausspielen der ersten Karte im Stich
-                elseif activePlayer == startPlayerTrick then
-                    suitToFollow = suit
-                    log(suitToFollow, "zu bedienende Farbe", "Stich")
-                    setBest(droppingPlayer, droppedCard)
-                    nextActivePlayer()
-                    log(activePlayer, "aktiver Spieler", "Turn")
-
-                --Wenn bereits eine Karte ausgespielt wurde (nicht Startspieler)
+                --Spieler ist am Zug
                 else
-                    --Wenn bedient wird
-                    if suit == suitToFollow then
-                        if betterValue(droppedCard) == true then
-                            setBest(droppingPlayer, droppedCard)
-                        end
+                    --Ausspielen der ersten Karte im Stich
+                    if activePlayer == startPlayerTrick then
+                        suitToFollow = suit
+                        log(suitToFollow, "zu bedienende Farbe", "Stich")
+                        setBest(droppingPlayer, droppedCard)
                         nextActivePlayer()
-                    --Wenn nicht bedient wird
-                  elseif checkPlayable(droppingPlayer, droppedCard) == true then
-                        --Wenn gestochen wird
-                        if suit == trump then
-                            if bestCard.getDescription() == trump then
-                               if betterValue(droppedCard) then
-                                 setBest(droppingPlayer, droppedCard)
-                               end
-                            end
-                            setBest(droppingPlayer, droppedCard)
-                        end
-                        nextActivePlayer()
+                        log(activePlayer, "aktiver Spieler", "Turn")
+                        lockPlayedCard(droppedCard)
+
+
+
+                    --Wenn bereits eine Karte ausgespielt wurde (nicht Startspieler)
                     else
-                        return
+                        --Wenn bedient wird
+                        if suit == suitToFollow then
+                            lockPlayedCard(droppedCard)
+                            if betterValue(droppedCard) == true then
+                                setBest(droppingPlayer, droppedCard)
+                            end
+                            nextActivePlayer()
+                        --Wenn nicht bedient wird
+                        elseif checkPlayable(droppingPlayer, droppedCard) == true then
+                            lockPlayedCard(droppedCard)
+                            --Wenn gestochen wird
+                            if suit == trump then
+                                if bestCard.getDescription() == trump then
+                                   if betterValue(droppedCard) then
+                                     setBest(droppingPlayer, droppedCard)
+                                   end
+                                end
+                                setBest(droppingPlayer, droppedCard)
+                            end
+                            nextActivePlayer()
+                        else
+                            return
+                        end
                     end
                 end
                 return
