@@ -1,0 +1,360 @@
+--#include ~/Documents/Tabletop Simulator Projects/tts_wizard/test
+
+deckGUID = "a92a97"
+deckZoneGUID = "a09ba8"
+playZoneGUID = "aa5aa2"
+
+whiteCounterGUID = "75b7a7"
+redCounterGUID = "2dcca8"
+orangeCounterGUID = "046790"
+yellowCounterGUID = "c635b3"
+greenCounterGUID = "f6d657"
+blueCounterGUID = "c44d44"
+purpleCounterGUID = "65b4d9"
+pinkCounterGUID = "80d397"
+
+logToAll = true
+minPlayerNumber = 1
+tricks = {}
+points = {}
+bids = {}
+bidRound = false
+counterObject = {}
+
+function onLoad()
+    deckZone = getObjectFromGUID(deckZoneGUID)
+    deck = getObjectFromGUID(deckGUID)
+    playZone = getObjectFromGUID(playZoneGUID)
+end
+
+function waitForTrump()
+    Wait.frames(setTrump, 10)
+end
+
+function setTrump()
+    local deckZoneObjects = deckZone.getObjects()
+    for _, item in ipairs(deckZoneObjects) do
+        if item.tag == "Card" then
+            trump = item.getDescription()
+            return true
+        end
+    end
+    logToAllOrHost("Fehler bei Ermittlung Trumpf", "Red")
+end
+
+function setTricksToZero()
+    for i = 1, numberOfPlayers, 1 do
+        --playerList[i].tricks = 0 --geht so anscheinend nicht
+        tricks[i] = 0
+    end
+    tricksTotal = 0
+end
+
+function setPlayerNumber()
+    playerList = getSeatedPlayers()
+    numberOfPlayers = #playerList
+    if numberOfPlayers < minPlayerNumber or numberOfPlayers > 6 then
+        broadcastToAll("Dieses Spiel ist nur für 3-6 Spieler!", "Red")
+        return false
+    end
+    broadcastToAll("Ihr spielt mit "..numberOfPlayers.." Spielern", "Green")
+    return true
+end
+
+function randomStartPlayer()
+    startPlayerNumber = math.random(1, numberOfPlayers)
+    startPlayerRound = playerList[startPlayerNumber]
+    broadcastToAll("Spieler "..startPlayerRound.." ist Startspieler", startPlayerRound)
+    log(playerList, "Spielerliste")
+end
+
+function setStartRoundVar()
+    activePlayerNumber = startPlayerNumber
+    activePlayer = startPlayerRound
+    startPlayerTrick = startPlayerRound
+    setTricksToZero()
+    round = round + 1
+end
+
+function tableContains(table, element)
+    for _, item in ipairs(table) do
+        if item == element then
+          return true
+        end
+    end
+    return false
+end
+
+function bid(counterParams)
+    log(counterParams, "Parameter")
+    log(counterParams.counterPlayer, "Parameter Spieler")
+    log(counterParams.counterValue, "Parameter Wert")
+    if bidRound == false then
+        broadcastToColor("Du darfst jetzt nicht deine Stiche angeben", counterParams.counterPlayer, "Red")
+    elseif activePlayer == counterParams.counterPlayer then
+        bids[activePlayerNumber] = counterParams.counterValue
+        log(bids[activePlayerNumber], "Gebot")
+        log(activePlayer, "Spieler, de geboten hat")
+    end
+end
+
+function destroyUnusedCounters()
+    if tableContains(playerList, "White") == false then
+        destroyObject(getObjectFromGUID(whiteCounterGUID))
+    end
+    if tableContains(playerList, "Red") == false then
+        destroyObject(getObjectFromGUID(redCounterGUID))
+    end
+    if tableContains(playerList, "Orange") == false then
+        destroyObject(getObjectFromGUID(orangeCounterGUID))
+    end
+    if tableContains(playerList, "Yellow") == false then
+        destroyObject(getObjectFromGUID(yellowCounterGUID))
+    end
+    if tableContains(playerList, "Green") == false then
+        destroyObject(getObjectFromGUID(greenCounterGUID))
+    end
+    if tableContains(playerList, "Blue") == false then
+        destroyObject(getObjectFromGUID(blueCounterGUID))
+    end
+    if tableContains(playerList, "Purple") == false then
+        destroyObject(getObjectFromGUID(purpleCounterGUID))
+    end
+    if tableContains(playerList, "Pink") == false then
+        destroyObject(getObjectFromGUID(pinkCounterGUID))
+    end
+end
+
+function setCounterObjects()
+    destroyUnusedCounters()
+    for i = 1 , numberOfPlayers, 1 do
+        if playerList[i] == "White" then
+            counterObject[i] = getObjectFromGUID(whiteCounterGUID)
+        elseif playerList[i] == "Red" then
+            counterObject[i] = getObjectFromGUID(redCounterGUID)
+        elseif playerList[i] == "Orange" then
+            counterObject[i] = getObjectFromGUID(orangeCounterGUID)
+        elseif playerList[i] == "Yellow" then
+            counterObject[i] = getObjectFromGUID(yellowCounterGUID)
+        elseif playerList[i] == "Green" then
+            counterObject[i] = getObjectFromGUID(greenCounterGUID)
+        elseif playerList[i] == "Blue" then
+            counterObject[i] = getObjectFromGUID(blueCounterGUID)
+        elseif playerList[i] == "Purple" then
+            counterObject[i] = getObjectFromGUID(purpleCounterGUID)
+        elseif playerList[i] == "Pink" then
+            counterObject[i] = getObjectFromGUID(pinkCounterGUID)
+        end
+    end
+end
+
+function setupTheGame()
+    setCounterObjects()
+    randomStartPlayer()
+    round = 0
+    setPointsToZero()
+    startRound()
+end
+
+function startRound()
+    setStartRoundVar()
+    local deck = getObjectFromGUID(deckGUID)
+    -- Deck wird gemischt und die erste Karte wird ausgeteilt
+    deck.randomize()
+    deck.deal(round+4)
+    -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
+    local deckPos = deck.getPosition()
+    deck.takeObject({flip = true, position = deckPos})
+    waitForTrump()
+    bidRound = true
+end
+
+function setPointsToZero()
+    for i = 1, numberOfPlayers, 1 do
+        --playerList[i].tricks = 0 --geht so anscheinend nicht
+        points[i] = 0
+    end
+end
+
+function countPoints()
+  for i = 1, numberOfPlayers, 1 do
+      --playerList[i].tricks = 0 --geht so anscheinend nicht
+      if bid[i] == tricks[i] then
+          points[i] = 20 + 10 * tricks[i] + points[i]
+      else
+          points[i] = math.abs(bid[i] - tricks[i]) * -10 + points[i]
+      end
+      log(points[i], "Punkteliste")
+  end
+end
+
+function endRound()
+    countPoints()
+    collectCards()
+    startPlayerNumber = startPlayerNumber % numberOfPlayers + 1
+    startPlayerRound = playerList[startPlayerNumber]
+    startRound()
+end
+
+function countTricks()
+    log(bestCardPlayer, "bester Spieler im Moment des Stiche zählens")
+    tricks[bestCardPlayerNumber] = tricks[bestCardPlayerNumber] + 1
+    log(tricks[bestCardPlayerNumber], "Anzahl Stiche des Spielers, der Stich gewinnt")
+    tricksTotal = tricksTotal + 1
+    if tricksTotal == round then
+        endRound()
+    end
+end
+
+function endTrick()
+    local groupedTrick = group(playZone.getObjects())
+    log(groupedTrick, "gruppierter Stich")
+    Wait.time(function()
+        local playZoneObjects = playZone.getObjects()
+        for _, item in ipairs(playZoneObjects) do
+            if item.tag == "Deck" then
+                for i = 1, numberOfPlayers+1, 1 do
+                    item.dealToColorWithOffset({-5+3*tricks[bestCardPlayerNumber], 0, 5}, true, bestCardPlayer)
+                    log(bestCardPlayer, "bester Spieler")
+                    log(item, "Deck in Zone")
+                end
+            end
+        end
+    end, 1)
+    --bestCardPlayer.tricks = bestCardPlayer.tricks+1 --SIEHE OBEN
+    countTricks()
+    startPlayerTrick = bestCardPlayer
+    activePlayer = bestCardPlayer
+end
+
+function nextActivePlayer()
+    activePlayerNumber = activePlayerNumber % numberOfPlayers + 1
+    activePlayer = playerList[activePlayerNumber]
+    if activePlayer == startPlayerTrick then
+        endTrick()
+    else
+        broadcastToAll("Spieler "..activePlayer.." ist am Zug.", activePlayer)
+    end
+end
+
+function detectBestCardPlayerNumber()
+  for i = 1, numberOfPlayers, 1 do
+      if bestCardPlayer == playerList[i] then
+          bestCardPlayerNumber = i
+          log(bestCardPlayerNumber, "Nummer Spieler", "Stiche")
+          return
+      end
+  end
+end
+
+function setBest(droppingPlayer, droppedCard)
+    bestCardPlayer = droppingPlayer
+    detectBestCardPlayerNumber()
+    bestCard = droppedCard
+    bestCardValue = tonumber(bestCard.getName())
+end
+
+
+--Checked ob Karte bei Nicht-Bedienen spielbar ist (ob Spieler wirklich nicht bedienen kann)
+function checkPlayable(droppingPlayer, droppedCard)
+
+    local handCards = Player[droppingPlayer].getHandObjects()
+
+    for _, item in ipairs(handCards) do
+        --Wenn es Handkarten zum Bedienen gibt
+        if item.getDescription() == suitToFollow then
+            logToAllOrHost("Du musst bedienen!", "Red")
+            droppedCard.deal(1, droppingPlayer)
+            return false
+        end
+    end
+    return true
+end
+
+function betterValue(droppedCard)
+  droppedCardValue = tonumber(droppedCard.getName())
+    --Wenn ausgespielte Karte besser ist
+  if droppedCardValue > bestCardValue then
+      return true
+  else return false
+  end
+end
+
+function onObjectDrop(droppingPlayer, droppedCard)
+
+    local playZoneObjects = playZone.getObjects()
+    --log(droppedCard, "Karte gedropped", "Ausspielen")
+    --log(playZoneObjects, "Objekte in PlayZone", "Ausspielen")
+
+    for _, item in ipairs(playZoneObjects) do
+        --Wenn Karte in die playZone gelegt wird
+        if item == droppedCard then
+
+            --Wenn noch die Stiche geboten werden müssen
+            if bidRound then
+                broadcastToAll("Ihr müsst noch eure Stiche angeben!", "Red")
+            else
+
+                --log(item, "Karte in Zone gedropped", "Ausspielen")
+                --cardPlayed(droppingPlayer, droppedCard)
+                local suit = droppedCard.getDescription()
+
+                --Ausspielen von Spieler der nicht am Zug ist
+                if droppingPlayer != activePlayer then
+                    logToAllOrHost("Du (Spieler "..droppingPlayer..") bist nicht dran! Spieler "..activePlayer.." ist am Zug")
+                    droppedCard.deal(1, droppingPlayer)
+
+                --Ausspielen der ersten Karte im Stich
+                elseif activePlayer == startPlayerTrick then
+                    suitToFollow = suit
+                    log(suitToFollow, "zu bedienende Farbe", "Stich")
+                    setBest(droppingPlayer, droppedCard)
+                    nextActivePlayer()
+                    log(activePlayer, "aktiver Spieler", "Turn")
+
+                --Wenn bereits eine Karte ausgespielt wurde (nicht Startspieler)
+                else
+                    --Wenn bedient wird
+                    if suit == suitToFollow then
+                        if betterValue(droppedCard) then
+                            setBest(droppingPlayer, droppedCard)
+                        end
+                        nextActivePlayer()
+                    --Wenn nicht bedient wird
+                    elseif checkPlayable(droppingPlayer, droppedCard) then
+                        --Wenn gestochen wird
+                        if suit == trump then
+                            if bestCard.getDescription() == trump then
+                               if betterValue(droppedCard) then
+                                 setBest(droppingPlayer, droppedCard)
+                               end
+                            end
+                            setBest(droppingPlayer, droppedCard)
+                        end
+                        nextActivePlayer()
+                    else
+                        return
+                    end
+                end
+                return
+            end
+        end
+    end
+    --hier kann noch was hin, für alle gedroppten Objekte, welche nicht in die playZone gedroppt wurden
+end
+
+--[[function cardPlayed(playedCard)
+
+end--]]
+
+function logToAllOrHost(text, color)
+    if logToAll then
+        printToAll(text, color)
+    else
+        print(text)
+    end
+end
+
+function onChat()
+    log(trump)
+end

@@ -1,0 +1,8 @@
+<button
+    onClick="bid"
+    position="0 22 -24"
+    width="50"
+    height="20"
+    fontSize="17">
+    Bid
+</button>
