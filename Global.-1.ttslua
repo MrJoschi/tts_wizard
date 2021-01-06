@@ -13,18 +13,34 @@ blueCounterGUID = "c44d44"
 purpleCounterGUID = "65b4d9"
 pinkCounterGUID = "80d397"
 
-logToAll = false
+textPlayerGUID = {}
+
+textPlayerGUID[1] = "f009aa"
+textPlayerGUID[2] = "8c7d09"
+textPlayerGUID[3] = "16778e"
+textPlayerGUID[4] = "1d529f"
+textPlayerGUID[5] = "2cb93a"
+textPlayerGUID[6] = "6c27f2"
+
+textPointsGUID = "65e97f"
+
+logToAll = true
 minPlayerNumber = 1
 tricks = {}
 points = {}
 bids = {}
 bidRound = false
 counterObject = {}
+textPlayer = {}
 
 function onLoad()
     deckZone = getObjectFromGUID(deckZoneGUID)
     deck = getObjectFromGUID(deckGUID)
     playZone = getObjectFromGUID(playZoneGUID)
+    for i = 1, 6, 1 do
+        textPlayer[i] = getObjectFromGUID(textPlayerGUID[i])
+    end
+    textPointsOrigin = getObjectFromGUID(textPointsGUID)
 end
 
 function waitForTrump()
@@ -90,11 +106,14 @@ function bid(counterParams)
     -- log(counterParams.counterValue, "Parameter Wert")
     if bidRound == false then
         broadcastToColor("Du darfst jetzt nicht deine Stiche angeben", counterParams.counterPlayer, "Red")
-    elseif activePlayer == counterParams.counterPlayer then
-        bids[activePlayerNumber] = counterParams.counterValue
-        log(bids[activePlayerNumber], "Gebot")
-        log(activePlayer, "Spieler, de geboten hat")
-        nextActivePlayer()
+    else
+        if activePlayer == counterParams.counterPlayer then
+            bids[activePlayerNumber] = counterParams.counterValue
+            textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
+            log(bids[activePlayerNumber], "Gebot")
+            log(activePlayer, "Spieler, de geboten hat")
+            nextActivePlayer()
+        end
     end
 end
 
@@ -148,11 +167,64 @@ function setCounterObjects()
     end
 end
 
+function writePoints()
+    for i = 1, numberOfPlayers, 1 do
+        textPoints[i][round].setValue(tostring(points[i]))
+        log(points[i], "Punkte")
+    end
+end
+
+function writePointblockHeadlines()
+    if numberOfPlayers < 6 then
+        for i = 6, numberOfPlayers + 1, -1 do
+            textPlayer[i].destruct()
+        end
+    end
+    for i = 1, numberOfPlayers, 1 do
+        --textPlayer[i].setValue(Player[playerList[startPlayerNumber % numberOfPlayers + i]].steam_name)
+        textPlayer[i].setValue(Player[playerList[i]].steam_name)
+    end
+
+end
+
+function setTextPoints()
+  textPoints = {}   -- create the matrix
+  for i = 1, numberOfPlayers do
+      textPoints[i] = {}     -- create a new row
+      --for j = 1, 60 / numberOfPlayers do
+      for j = 1, 20 do
+          textPoints[i][j] = textPointsOrigin.clone({
+            position     = {x = -20.84 + 2.34 * i, y = -4.1, z = 8.24 - 0.903 * j} --y-Koordinate ist ein Bug
+          })
+      end
+  end
+end
+
+function setTextBids()
+  textBids = {}   -- create the matrix
+  --for i = 1, numberOfPlayers do
+  for i = 1, 6 do
+      textBids[i] = {}     -- create a new row
+      --for j = 1, 60 / numberOfPlayers do
+      for j = 1, 20 do
+          textBids[i][j] = textPointsOrigin.clone({
+            position     = {x = -19.68 + 2.34 * i, y = -4.1, z = 8.24 - 0.903 * j} --y-Koordinate ist ein Bug
+          })
+      end
+  end
+end
+
 function setupTheGame()
     setCounterObjects()
     randomStartPlayer()
+    writePointblockHeadlines()
     round = 0
     setPointsToZero()
+    setTextPoints()
+    setTextBids()
+    log(counterObject[1].interactable, "interagieren")
+    counterObject[1].interactable = false
+    log(counterObject[1].interactable, "interagieren")
     startRound()
 end
 
@@ -187,7 +259,7 @@ function countPoints()
   end
 end
 
-function collectCards(callback)
+function collectCards()
     local allObjects = getAllObjects()
     local allCards = {}
     for _, item in ipairs(allObjects) do
@@ -198,18 +270,34 @@ function collectCards(callback)
     log(allCards, "Var allCards")
     local allCardsDeck = group(allCards)
     log(allCardsDeck, "1 Var allCardsDeck")
-    Wait.time(function()
-        log(allCardsDeck, "2 Var allCardsDeck")
-        allCardsDeck.setPositionSmooth(Table, bool, bool) --HIER WEITERMACHEN, NOCH FEHLER
-        callback()
-    end, 3)
+    -- Wait.time(function()
+    --     log(allCardsDeck, "2 Var allCardsDeck")
+    --     allCardsDeck.setPositionSmooth({x=5,y=5,z=5}, false, false) --HIER WEITERMACHEN, NOCH FEHLER
+    --     --callback()
+    -- end, 2)
+    Wait.time(resetDeck, 1)
+end
+
+function resetDeck()
+    -- local allObjects = getAllObjects()
+    -- log(allObjects)
+    -- for _, item in ipairs(allObjects) do
+    --     if item.tag == "Deck" then
+    --         local collectedDeck = item
+    --     end
+    -- end
+    -- log(collectedDeck, "collectedDeck")
+    -- collectedDeck.setPosition({x=5,y=5,z=5})
+    deck.setPositionSmooth({x=-0.6,y=1,z=-1.1}, false, false)
+    startRound()
 end
 
 function endRound()
     countPoints()
+    writePoints()
     startPlayerNumber = startPlayerNumber % numberOfPlayers + 1
     startPlayerRound = playerList[startPlayerNumber]
-    collectCards(startRound)
+    collectCards()
 end
 
 function countTricks()
@@ -218,7 +306,7 @@ function countTricks()
     log(tricks[bestCardPlayerNumber], "Anzahl Stiche des Spielers, der Stich gewinnt")
     tricksTotal = tricksTotal + 1
     if tricksTotal == round then
-        Wait.time(endRound, 3)
+        Wait.time(endRound, 1)
     end
 end
 
@@ -246,12 +334,12 @@ function nextActivePlayer()
     activePlayerNumber = activePlayerNumber % numberOfPlayers + 1
     activePlayer = playerList[activePlayerNumber]
     if activePlayer == startPlayerTrick then
-        if bidRound == false then
-            endTrick()
-        else
+        if bidRound == true then
             bidRound = false
+            broadcastToAll("Spieler "..activePlayer.." ist am Zug.", activePlayer)
+        else
+            endTrick()
         end
-
     else
         broadcastToAll("Spieler "..activePlayer.." ist am Zug.", activePlayer)
     end
@@ -393,9 +481,6 @@ function logToAllOrHost(text, color)
 end
 
 function onChat()
-    for i = 1, numberOfPlayers, 1 do
-        logToAllOrHost(i)
-        logToAllOrHost(points[i])
-    end
+    writePoints()
 
 end
