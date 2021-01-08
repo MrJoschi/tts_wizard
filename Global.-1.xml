@@ -1,1 +1,17 @@
 <!-- Xml UI. See documentation: https://api.tabletopsimulator.com/ui/introUI/ -->
+
+<Defaults>
+    <!-- Set the default color and font size for all Text elements -->
+    <Text fontSize = "20" fontStyle = "Bold" alignment = "MiddleRight"/>
+
+</Defaults>
+
+<VerticalLayout
+  Height = "200">
+    <Text color = "Black" id = "ScoreboardPlayer1" text = ""></Text>
+    <Text color = "Black" id = "ScoreboardPlayer2" text = ""></Text>
+    <Text color = "Black" id = "ScoreboardPlayer3" text = ""></Text>
+    <Text color = "Black" id = "ScoreboardPlayer4" text = ""></Text>
+    <Text color = "Black" id = "ScoreboardPlayer5" text = ""></Text>
+    <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
+</VerticalLayout>
