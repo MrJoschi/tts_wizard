@@ -91,21 +91,21 @@ function setPlayerNumber()
         broadcastToAll("Dieses Spiel ist nur für 3-6 Spieler!", "Red")
         return false
     end
-    broadcastToAll("Ihr spielt mit "..numberOfPlayers.." Spielern", "Green")
+    broadcastToAll("You are playing with "..numberOfPlayers.." players", "Green")
     return true
 end
 
 function randomStartPlayer()
     startPlayerNumber = math.random(1, numberOfPlayers)
     startPlayerRound = playerList[startPlayerNumber]
-    broadcastToAll("Spieler "..startPlayerRound.." ist Startspieler", startPlayerRound)
-    log(playerList, "Spielerliste")
+    broadcastToAll(Player[startPlayerRound].steam_name.." is randomly chosen as starting player", startPlayerRound)
 end
 
 function setStartRoundVar()
     activePlayerNumber = startPlayerNumber
     activePlayer = startPlayerRound
     startPlayerTrick = startPlayerRound
+    printTurn(activePlayer)
     setTricksToZero()
     round = round + 1
 end
@@ -120,9 +120,6 @@ function tableContains(table, element)
 end
 
 function bid(counterParams)
-    -- log(counterParams, "Parameter")
-    -- log(counterParams.counterPlayer, "Parameter Spieler")
-    -- log(counterParams.counterValue, "Parameter Wert")
     if bidRound == false then
         broadcastToColor("Du darfst jetzt nicht deine Stiche angeben", counterParams.counterPlayer, "Red")
     else
@@ -147,8 +144,6 @@ function bid(counterParams)
                 end
             end
             textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
-            log(bids[activePlayerNumber], "Gebot")
-            log(activePlayer, "Spieler, de geboten hat")
             nextActivePlayer()
         end
     end
@@ -207,7 +202,6 @@ end
 function writePoints()
     for i = 1, numberOfPlayers, 1 do
         textPoints[i][round].setValue(tostring(points[i]))
-        log(points[i], "Punkte")
         UI.setAttribute("ScoreboardPlayer"..i, "text", Player[playerList[i]].steam_name..": "..points[i])
     end
 end
@@ -254,8 +248,7 @@ end
 
 function writeScoreboard()
     for i = 1, numberOfPlayers, 1 do
-        UI.setAttribute("ScoreboardPlayer"..i, "color", playerList[i])
-        UI.setAttribute("ScoreboardPlayer"..i, "text", Player[playerList[i]].steam_name..": "..points[i])
+        UI.setAttributes("ScoreboardPlayer"..i, {color = playerList[i], text = Player[playerList[i]].steam_name..": "..points[i]})
     end
 end
 
@@ -267,10 +260,8 @@ function setupTheGame()
     setPointsToZero()
     setTextPoints()
     setTextBids()
+    turnOnTurnScreen()
     writeScoreboard()
-    log(counterObject[1].interactable, "interagieren")
-    counterObject[1].interactable = false
-    log(counterObject[1].interactable, "interagieren")
     startRound()
 end
 
@@ -282,7 +273,6 @@ function startRound()
     deck.deal(round)
     -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
     local deckPos = deck.getPosition()
-    log(deckPos, "Deckposition")
     deck.takeObject({flip = true, position = deckPos})
     waitForTrump()
     bidRound = true
@@ -301,7 +291,6 @@ function countPoints()
       else
           points[i] = math.abs(bids[i] - tricks[i]) * -10 + points[i]
       end
-      log(points[i], "Punkteliste")
   end
 end
 
@@ -313,15 +302,12 @@ function collectCards()
             table.insert(allCards, item)
         end
     end
-    log(allCards, "Var allCards")
     local allCardsDeck = group(allCards)
-    log(allCardsDeck, "1 Var allCardsDeck")
-    -- Wait.time(function()
-    --     log(allCardsDeck, "2 Var allCardsDeck")
-    --     allCardsDeck.setPositionSmooth({x=5,y=5,z=5}, false, false) --HIER WEITERMACHEN, NOCH FEHLER
-    --     --callback()
-    -- end, 2)
-    Wait.time(resetDeck, 1)
+    Wait.time(resetDeck, 3)
+end
+
+function printEndScreen(player)
+    UI.setAttributes("PermanentTextTop", {text = "GAME OVER\nThe winner is: "..Player[player].steam_name, color = player})
 end
 
 function endGame()
@@ -333,33 +319,23 @@ function endGame()
         end
     end
     if #bestPlayer == 1 then
-        broadcastToAll("GAME OVER\nDer Gewinner ist:", "Red")
-        broadcastToAll(bestPlayer[1], bestPlayer[1])
+        printEndScreen(bestPlayer[1])
     else
-        broadcastToAll("GAME OVER\nDie Gewinner sind:", "Red")
+        broadcastToAll("GAME OVER\nThe winners are:", "Red")
         for i = 1, #bestPlayer, 1 do
             broadcastToAll(bestPlayer[i], bestPlayer[i])
             if i ~= #bestPlayer then
-                broadcastToAll("und", "Red")
+                broadcastToAll("and", "Red")
             end
         end
     end
 end
 
 function resetDeck()
-    -- local allObjects = getAllObjects()
-    -- log(allObjects)
-    -- for _, item in ipairs(allObjects) do
-    --     if item.tag == "Deck" then
-    --         local collectedDeck = item
-    --     end
-    -- end
-    -- log(collectedDeck, "collectedDeck")
-    -- collectedDeck.setPosition({x=5,y=5,z=5})
     if round == 60 / numberOfPlayers then
         endGame()
     else
-        deck.setPositionSmooth({x=-0.6,y=1,z=-1.1}, false, false)
+        deck.setPositionSmooth({x=0,y=1,z=0}, false, false)
         startRound()
     end
 end
@@ -369,13 +345,11 @@ function endRound()
     writePoints()
     startPlayerNumber = startPlayerNumber % numberOfPlayers + 1
     startPlayerRound = playerList[startPlayerNumber]
-    collectCards()
+    Wait.time(collectCards, 2)
 end
 
 function countTricks()
-    log(bestCardPlayer, "bester Spieler im Moment des Stiche zählens")
     tricks[bestCardPlayerNumber] = tricks[bestCardPlayerNumber] + 1
-    log(tricks[bestCardPlayerNumber], "Anzahl Stiche des Spielers, der Stich gewinnt")
     tricksTotal = tricksTotal + 1
     if tricksTotal == round then
         Wait.time(endRound, 1)
@@ -384,22 +358,20 @@ end
 
 function endTrick()
     local groupedTrick = group(playZone.getObjects())
-    log(groupedTrick, "gruppierter Stich")
     Wait.time(function()
         local playZoneObjects = playZone.getObjects()
         for _, item in ipairs(playZoneObjects) do
             if item.tag == "Deck" then
                 for i = 1, numberOfPlayers, 1 do
                     item.dealToColorWithOffset({-5+3*tricks[bestCardPlayerNumber], 0, 5}, true, bestCardPlayer)
-                    log(bestCardPlayer, "bester Spieler")
-                    log(item, "Deck in Zone")
                 end
             end
         end
     end, 1)
-    countTricks()
     startPlayerTrick = bestCardPlayer
     activePlayer = bestCardPlayer
+    activePlayerNumber = bestCardPlayerNumber
+    countTricks()
 end
 
 function nextActivePlayer()
@@ -407,18 +379,18 @@ function nextActivePlayer()
     activePlayer = playerList[activePlayerNumber]
     if playerList[activePlayerNumber % numberOfPlayers + 1] == startPlayerTrick then
         lastPlayer = true
-        broadcastToAll("Spieler "..activePlayer.." ist am Zug.", activePlayer)
+        printTurn(activePlayer)
     else
         lastPlayer = false
         if activePlayer == startPlayerTrick then
             if bidRound == true then
                 bidRound = false
-                broadcastToAll("Spieler "..activePlayer.." ist am Zug.", activePlayer)
+                printTurn(activePlayer)
             else
                 endTrick()
             end
         else
-            broadcastToAll("Spieler "..activePlayer.." ist am Zug.", activePlayer)
+            printTurn(activePlayer)
         end
     end
 end
@@ -427,7 +399,6 @@ function detectBestCardPlayerNumber()
   for i = 1, numberOfPlayers, 1 do
       if bestCardPlayer == playerList[i] then
           bestCardPlayerNumber = i
-          log(bestCardPlayerNumber, "Nummer Spieler", "Stiche")
           return
       end
   end
@@ -449,7 +420,7 @@ function checkHandcardsForSuitToFollow(droppingPlayer, droppedCard)
     for _, item in ipairs(handCards) do
         --Wenn es Handkarten zum Bedienen gibt
         if item.getName() == suitToFollow then
-            logToAllOrHost("Du musst bedienen!", "Red")
+            broadcastToColor("You need to follow the suit!", droppingPlayer, "Red")
             droppedCard.deal(1, droppingPlayer)
             return true
         end
@@ -475,8 +446,6 @@ end
 function onObjectDrop(droppingPlayer, droppedCard)
 
     local playZoneObjects = playZone.getObjects()
-    --log(droppedCard, "Karte gedropped", "Ausspielen")
-    --log(playZoneObjects, "Objekte in PlayZone", "Ausspielen")
 
     for _, item in ipairs(playZoneObjects) do
         --Wenn Karte in die playZone gelegt wird
@@ -484,19 +453,18 @@ function onObjectDrop(droppingPlayer, droppedCard)
 
             --Wenn noch die Stiche geboten werden müssen
             if bidRound == true then
-                broadcastToAll("Ihr müsst noch eure Stiche angeben!", "Red")
+                broadcastToAll("You need to bid how many tricks you try to get!", "Red")
                 droppedCard.deal(1, droppingPlayer)
 
             --Wenn schon geboten wurde
             else
 
-                --log(item, "Karte in Zone gedropped", "Ausspielen")
                 --cardPlayed(droppingPlayer, droppedCard)
                 local suit = droppedCard.getName()
 
                 --Ausspielen von Spieler der nicht am Zug ist
                 if droppingPlayer != activePlayer then
-                    logToAllOrHost("Du (Spieler "..droppingPlayer..") bist nicht dran! Spieler "..activePlayer.." ist am Zug")
+                    broadcastToColor("It is not your turn! It is "..activePlayer.."'s turn.", droppingPlayer, "Red")
                     droppedCard.deal(1, droppingPlayer)
 
                 --Spieler ist am Zug
@@ -504,10 +472,8 @@ function onObjectDrop(droppingPlayer, droppedCard)
                     --Ausspielen der ersten Karte im Stich
                     if activePlayer == startPlayerTrick then
                         suitToFollow = suit
-                        log(suitToFollow, "zu bedienende Farbe", "Stich")
                         setBest(droppingPlayer, droppedCard)
                         nextActivePlayer()
-                        log(activePlayer, "aktiver Spieler", "Turn")
                         lockPlayedCard(droppedCard)
 
                     --Wenn bereits eine Karte ausgespielt wurde (nicht Startspieler)
@@ -517,11 +483,9 @@ function onObjectDrop(droppingPlayer, droppedCard)
                           --Wenn darauf kein Narr gespielt wird
                           if suit ~= "N" then
                             suitToFollow = suit
-                            log(suitToFollow, "zu bedienende Farbe", "Stich")
                             setBest(droppingPlayer, droppedCard)
                           end
                           nextActivePlayer()
-                          log(activePlayer, "aktiver Spieler", "Turn")
                           lockPlayedCard(droppedCard)
 
                         --Wenn schon Zauberer gespielt wurde
@@ -586,17 +550,33 @@ function logToAllOrHost(text, color)
     end
 end
 
+function turnOnTurnScreen()
+    UI.setAttribute("TurnScreen", "active", "true")
+end
+
+function printTurn(player)
+    UI.setAttributes("TurnText", {text = Player[player].steam_name.."'s Turn", color = player})
+    printToAll("<--------------------- "..Player[player].steam_name.."'s Turn --------------------->", player)
+end
+
 function onChat(message, player)
-    log(bidRound)
+    log(round, "round")
+    log(activePlayer, "activePlayer")
+    log(activePlayerNumber, "activePlayerNumber")
+    log(startPlayerRound, "startPlayerRound")
+    log(startPlayerTrick, "startPlayerTrick")
+    log(startPlayerNumber, "startPlayerNumber")
+    log(bestCardPlayer, "bestCardPlayer")
+    log(bestCardPlayerNumber, "bestCardPlayerNumber")
     if waitForSelectTrump == true then
         local previousPlayerNumber = startPlayerNumber - 1
         if previousPlayerNumber == 0 then
            previousPlayerNumber = numberOfPlayers
         end
-        if player == playerList[previousPlayerNumber] then
+        if player.color == playerList[previousPlayerNumber] then
             if message == "h" or message == "p" or message == "k" or message == "c" then
                 trump = message
-                broadcastToAll(trump.." ist nun Trumpf", "Red")
+                broadcastToAll(trump.." is defined as trump", "Red")
                 waitForSelectTrump = false
             end
         end

@@ -1,9 +1,8 @@
 <!-- Xml UI. See documentation: https://api.tabletopsimulator.com/ui/introUI/ -->
 
 <Defaults>
-    <!-- Set the default color and font size for all Text elements -->
     <Text fontSize = "20" fontStyle = "Bold" alignment = "MiddleRight"/>
-
+    <TableLayout width="300" height="40" RectAlignment="UpperCenter" offsetXY="0 -80" cellPadding="0" color="#282828" cellBackgroundColor="Black"/>
 </Defaults>
 
 <VerticalLayout
@@ -15,3 +14,14 @@
     <Text color = "Black" id = "ScoreboardPlayer5" text = ""></Text>
     <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
 </VerticalLayout>
+
+<!-- <Text color = "Red" id = "PermanentTextTop" text = "" alignment = "UpperCenter" offsetXY = "0 -100" ></Text> -->
+<Text color = "Red" id = "PermanentTextMiddle" text = "" alignment = "MiddleCenter"></Text>
+
+<TableLayout id="TurnScreen" active = "false">
+    <Row dontUseTableRowBackground="true">
+        <Cell>
+            <Text id="TurnText" text="" alignment="MiddleCenter" />
+        </Cell>
+    </Row>
+</TableLayout>
