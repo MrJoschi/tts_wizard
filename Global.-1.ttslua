@@ -4,14 +4,16 @@ deckGUID = "a92a97"
 deckZoneGUID = "a09ba8"
 playZoneGUID = "aa5aa2"
 
-whiteCounterGUID = "75b7a7"
-redCounterGUID = "2dcca8"
-orangeCounterGUID = "046790"
-yellowCounterGUID = "c635b3"
-greenCounterGUID = "f6d657"
-blueCounterGUID = "c44d44"
-purpleCounterGUID = "65b4d9"
-pinkCounterGUID = "80d397"
+counterGUID = {
+    White = "75b7a7",
+    Red = "2dcca8",
+    Orange = "046790",
+    Yellow = "c635b3",
+    Green = "f6d657",
+    Blue = "c44d44",
+    Purple = "65b4d9",
+    Pink = "80d397"
+  }
 
 textPlayerGUID = {}
 
@@ -23,6 +25,8 @@ textPlayerGUID[5] = "2cb93a"
 textPlayerGUID[6] = "6c27f2"
 
 textPointsGUID = "65e97f"
+
+pointblockGUID = "2d4bf2"
 
 logToAll = true
 minPlayerNumber = 1
@@ -37,11 +41,16 @@ lastPlayer = false
 function onLoad()
     deckZone = getObjectFromGUID(deckZoneGUID)
     deck = getObjectFromGUID(deckGUID)
+    deck.interactable = false
     playZone = getObjectFromGUID(playZoneGUID)
     for i = 1, 6, 1 do
         textPlayer[i] = getObjectFromGUID(textPlayerGUID[i])
     end
     textPointsOrigin = getObjectFromGUID(textPointsGUID)
+    getObjectFromGUID(pointblockGUID).interactable = false
+    for player, GUID in pairs(counterGUID) do
+      getObjectFromGUID(GUID).interactable = false
+    end
 end
 
 function waitForTrump()
@@ -150,54 +159,35 @@ function bid(counterParams)
 end
 
 function destroyUnusedCounters()
-    if tableContains(playerList, "White") == false then
-        destroyObject(getObjectFromGUID(whiteCounterGUID))
-    end
-    if tableContains(playerList, "Red") == false then
-        destroyObject(getObjectFromGUID(redCounterGUID))
-    end
-    if tableContains(playerList, "Orange") == false then
-        destroyObject(getObjectFromGUID(orangeCounterGUID))
-    end
-    if tableContains(playerList, "Yellow") == false then
-        destroyObject(getObjectFromGUID(yellowCounterGUID))
-    end
-    if tableContains(playerList, "Green") == false then
-        destroyObject(getObjectFromGUID(greenCounterGUID))
-    end
-    if tableContains(playerList, "Blue") == false then
-        destroyObject(getObjectFromGUID(blueCounterGUID))
-    end
-    if tableContains(playerList, "Purple") == false then
-        destroyObject(getObjectFromGUID(purpleCounterGUID))
-    end
-    if tableContains(playerList, "Pink") == false then
-        destroyObject(getObjectFromGUID(pinkCounterGUID))
+    for player, GUID in pairs(counterGUID) do
+          if tableContains(playerList, player) == false then
+            destroyObject(getObjectFromGUID(GUID))
+          end
     end
 end
 
-function setCounterObjects()
-    destroyUnusedCounters()
-    for i = 1 , numberOfPlayers, 1 do
-        if playerList[i] == "White" then
-            counterObject[i] = getObjectFromGUID(whiteCounterGUID)
-        elseif playerList[i] == "Red" then
-            counterObject[i] = getObjectFromGUID(redCounterGUID)
-        elseif playerList[i] == "Orange" then
-            counterObject[i] = getObjectFromGUID(orangeCounterGUID)
-        elseif playerList[i] == "Yellow" then
-            counterObject[i] = getObjectFromGUID(yellowCounterGUID)
-        elseif playerList[i] == "Green" then
-            counterObject[i] = getObjectFromGUID(greenCounterGUID)
-        elseif playerList[i] == "Blue" then
-            counterObject[i] = getObjectFromGUID(blueCounterGUID)
-        elseif playerList[i] == "Purple" then
-            counterObject[i] = getObjectFromGUID(purpleCounterGUID)
-        elseif playerList[i] == "Pink" then
-            counterObject[i] = getObjectFromGUID(pinkCounterGUID)
-        end
-    end
-end
+-- function setCounterObjects()
+--     destroyUnusedCounters()
+--     for i = 1 , numberOfPlayers, 1 do
+--         if playerList[i] == "White" then
+--             counterObject[i] = getObjectFromGUID(whiteCounterGUID)
+--         elseif playerList[i] == "Red" then
+--             counterObject[i] = getObjectFromGUID(redCounterGUID)
+--         elseif playerList[i] == "Orange" then
+--             counterObject[i] = getObjectFromGUID(orangeCounterGUID)
+--         elseif playerList[i] == "Yellow" then
+--             counterObject[i] = getObjectFromGUID(yellowCounterGUID)
+--         elseif playerList[i] == "Green" then
+--             counterObject[i] = getObjectFromGUID(greenCounterGUID)
+--         elseif playerList[i] == "Blue" then
+--             counterObject[i] = getObjectFromGUID(blueCounterGUID)
+--         elseif playerList[i] == "Purple" then
+--             counterObject[i] = getObjectFromGUID(purpleCounterGUID)
+--         elseif playerList[i] == "Pink" then
+--             counterObject[i] = getObjectFromGUID(pinkCounterGUID)
+--         end
+--     end
+-- end
 
 function writePoints()
     for i = 1, numberOfPlayers, 1 do
@@ -246,14 +236,19 @@ function setTextBids()
   end
 end
 
+function turnOnScoreboard()
+  UI.setAttribute("Scoreboard", "active", "true")
+end
+
 function writeScoreboard()
     for i = 1, numberOfPlayers, 1 do
-        UI.setAttributes("ScoreboardPlayer"..i, {color = playerList[i], text = Player[playerList[i]].steam_name..": "..points[i]})
+        UI.setAttributes("ScoreboardPlayer"..i, {color = playerList[i], text = Player[playerList[i]].steam_name})
+        UI.setAttributes("ScoreboardPoints"..i, {color = playerList[i], text = points[i]})
     end
 end
 
 function setupTheGame()
-    setCounterObjects()
+    destroyUnusedCounters()
     randomStartPlayer()
     writePointblockHeadlines()
     round = 0
@@ -261,6 +256,7 @@ function setupTheGame()
     setTextPoints()
     setTextBids()
     turnOnTurnScreen()
+    turnOnScoreboard()
     writeScoreboard()
     startRound()
 end
@@ -353,6 +349,8 @@ function countTricks()
     tricksTotal = tricksTotal + 1
     if tricksTotal == round then
         Wait.time(endRound, 1)
+    else
+        printTurn(activePlayer)
     end
 end
 
@@ -498,7 +496,7 @@ function onObjectDrop(droppingPlayer, droppedCard)
                             --Wenn bedient wird
                             if suit == suitToFollow then
                                 lockPlayedCard(droppedCard)
-                                if betterValue(droppedCard) == true then
+                                if bestCard.getName() ~= trump and betterValue(droppedCard) == true then
                                     setBest(droppingPlayer, droppedCard)
                                 end
                                 nextActivePlayer()
@@ -517,12 +515,14 @@ function onObjectDrop(droppingPlayer, droppedCard)
                                 lockPlayedCard(droppedCard)
                                 --Wenn gestochen wird
                                 if suit == trump then
+                                    --Wenn zuvor schon gestochen wurde
                                     if bestCard.getName() == trump then
                                        if betterValue(droppedCard) then
                                          setBest(droppingPlayer, droppedCard)
                                        end
+                                    else
+                                        setBest(droppingPlayer, droppedCard)
                                     end
-                                    setBest(droppingPlayer, droppedCard)
                                 end
                                 nextActivePlayer()
                             else
@@ -560,6 +560,7 @@ function printTurn(player)
 end
 
 function onChat(message, player)
+    log(counterGUID.White, "counterGUID")
     log(round, "round")
     log(activePlayer, "activePlayer")
     log(activePlayerNumber, "activePlayerNumber")

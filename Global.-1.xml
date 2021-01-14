@@ -1,11 +1,12 @@
 <!-- Xml UI. See documentation: https://api.tabletopsimulator.com/ui/introUI/ -->
 
 <Defaults>
-    <Text fontSize = "20" fontStyle = "Bold" alignment = "MiddleRight"/>
+    <Text fontSize = "20" fontStyle = "Bold" alignment = "MiddleCenter"/>
     <TableLayout width="300" height="40" RectAlignment="UpperCenter" offsetXY="0 -80" cellPadding="0" color="#282828" cellBackgroundColor="Black"/>
+    <Row dontUseTableRowBackground="true" preferredHeight="40" active="true"/>
 </Defaults>
 
-<VerticalLayout
+<!-- <VerticalLayout
   Height = "200">
     <Text color = "Black" id = "ScoreboardPlayer1" text = ""></Text>
     <Text color = "Black" id = "ScoreboardPlayer2" text = ""></Text>
@@ -13,13 +14,64 @@
     <Text color = "Black" id = "ScoreboardPlayer4" text = ""></Text>
     <Text color = "Black" id = "ScoreboardPlayer5" text = ""></Text>
     <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
-</VerticalLayout>
+</VerticalLayout> -->
+
+<TableLayout id="ScoreBoard" width="200" RectAlignment="MiddleRight" offsetXY="-5 0" columnWidths="0 50" Height="240" active="false">
+    <Row>
+        <Cell>
+            <Text alignment = "MiddleLeft" id = "ScoreboardPlayer1" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPoints1" text = ""></Text>
+        </Cell>
+    </Row>
+    <Row>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPlayer2" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPoints2" text = ""></Text>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPlayer3" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPoints3" text = ""></Text>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPlayer4" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPoints4" text = ""></Text>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPlayer5" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPoints5" text = ""></Text>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text color = "Black" id = "ScoreboardPoints6" text = ""></Text>
+        </Cell>
+    </Row>
+</TableLayout>
 
 <!-- <Text color = "Red" id = "PermanentTextTop" text = "" alignment = "UpperCenter" offsetXY = "0 -100" ></Text> -->
 <Text color = "Red" id = "PermanentTextMiddle" text = "" alignment = "MiddleCenter"></Text>
 
 <TableLayout id="TurnScreen" active = "false">
-    <Row dontUseTableRowBackground="true">
+    <Row dontUseTableRowBackground="true" active="true">
         <Cell>
             <Text id="TurnText" text="" alignment="MiddleCenter" />
         </Cell>
