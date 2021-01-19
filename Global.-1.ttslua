@@ -34,9 +34,41 @@ tricks = {}
 points = {}
 bids = {}
 bidRound = false
-counterObject = {}
 textPlayer = {}
 lastPlayer = false
+
+--function onLoad()
+
+-- <button
+--     onClick="bid"
+--     position="0 22 -24"
+--     width="50"
+--     height="20"
+--     fontSize="17">
+--     Bid
+-- </button>
+--
+--     params = {
+--         click_function = "bidButtonReturn",
+--         --function_owner = self,
+--         label          = "Bid",
+--         position       = {0, 22, -24},
+--         --rotation       = {0, 180, 0},
+--         width          = 50,
+--         height         = 20,
+--         font_size      = 17,
+--         color          = {0.5, 0.5, 0.5},
+--         font_color     = {1, 1, 1},
+--         tooltip        = "This text appears on mouseover.",
+--     }
+--     self.createButton(params)
+-- end
+--
+-- function bidButtonReturn(obj, color, alt_click)
+--     print(obj)
+--     print(color)
+--     print(alt_click)
+-- end
 
 function onLoad()
     deckZone = getObjectFromGUID(deckZoneGUID)
@@ -128,32 +160,48 @@ function tableContains(table, element)
     return false
 end
 
+function clearCounter(counter)
+    for player, GUID in pairs(counterGUID) do
+        if player == counter then
+            getObjectFromGUID(GUID).Counter.clear()
+        end
+    end
+end
+
 function bid(counterParams)
     if bidRound == false then
-        broadcastToColor("Du darfst jetzt nicht deine Stiche angeben", counterParams.counterPlayer, "Red")
+        broadcastToColor("It's not time to bid for tricks!", counterParams.counterPlayer, "Red")
     else
         if waitForSelectTrump == true then
             local previousPlayerNumber = startPlayerNumber - 1
             if previousPlayerNumber == 0 then
                previousPlayerNumber = numberOfPlayers
             end
-            broadcastToColor("Spieler "..playerList[previousPlayerNumber].." muss noch den Trumpf bestimmen", counterParams.counterPlayer, "Red")
+            broadcastToColor(Player[playerList[previousPlayerNumber]].steam_name.." has to determine trump.", counterParams.counterPlayer, "Red")
             return
         end
         if activePlayer == counterParams.counterPlayer then
-            bids[activePlayerNumber] = counterParams.counterValue
-            if lastPlayer == true then
-                local bidsTotal = 0
-                for i = 1, numberOfPlayers, 1 do
-                    bidsTotal = bidsTotal + bids[i]
+            if counterParams.counterValue < 0 then
+                broadcastToColor("Negative bids are not allowed!", counterParams.counterPlayer, "Red")
+                clearCounter(counterParams.counterPlayer)
+            elseif counterParams.counterValue > round then
+                broadcastToColor("You don't have that many cards!", counterParams.counterPlayer, "Red")
+                clearCounter(counterParams.counterPlayer)
+            else
+                bids[activePlayerNumber] = counterParams.counterValue
+                if lastPlayer == true then
+                    local bidsTotal = 0
+                    for i = 1, numberOfPlayers, 1 do
+                        bidsTotal = bidsTotal + bids[i]
+                    end
+                    if bidsTotal == round then
+                        broadcastToColor("The total tricks must not equal the number of cards handed out this round. Please change your bid!", counterParams.counterPlayer, "Red")
+                        return
+                    end
                 end
-                if bidsTotal == round then
-                    broadcastToColor("Die Gesamtstiche dürfen nicht der Anzahl der aktuell ausgeteilten Karten entsprechen! Bitte ändere dein Gebot", counterParams.counterPlayer, "Red")
-                    return
-                end
+                textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
+                nextActivePlayer()
             end
-            textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
-            nextActivePlayer()
         end
     end
 end
@@ -165,29 +213,6 @@ function destroyUnusedCounters()
           end
     end
 end
-
--- function setCounterObjects()
---     destroyUnusedCounters()
---     for i = 1 , numberOfPlayers, 1 do
---         if playerList[i] == "White" then
---             counterObject[i] = getObjectFromGUID(whiteCounterGUID)
---         elseif playerList[i] == "Red" then
---             counterObject[i] = getObjectFromGUID(redCounterGUID)
---         elseif playerList[i] == "Orange" then
---             counterObject[i] = getObjectFromGUID(orangeCounterGUID)
---         elseif playerList[i] == "Yellow" then
---             counterObject[i] = getObjectFromGUID(yellowCounterGUID)
---         elseif playerList[i] == "Green" then
---             counterObject[i] = getObjectFromGUID(greenCounterGUID)
---         elseif playerList[i] == "Blue" then
---             counterObject[i] = getObjectFromGUID(blueCounterGUID)
---         elseif playerList[i] == "Purple" then
---             counterObject[i] = getObjectFromGUID(purpleCounterGUID)
---         elseif playerList[i] == "Pink" then
---             counterObject[i] = getObjectFromGUID(pinkCounterGUID)
---         end
---     end
--- end
 
 function writePoints()
     for i = 1, numberOfPlayers, 1 do
@@ -261,6 +286,10 @@ function setupTheGame()
     startRound()
 end
 
+function callbackFlippedCard(flippedCard)
+    flippedCard.interactable = false
+end
+
 function startRound()
     setStartRoundVar()
     local deck = getObjectFromGUID(deckGUID)
@@ -269,7 +298,7 @@ function startRound()
     deck.deal(round)
     -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
     local deckPos = deck.getPosition()
-    deck.takeObject({flip = true, position = deckPos})
+    deck.takeObject({flip = true, position = deckPos, callback_function = function(obj) callbackFlippedCard(obj) end})
     waitForTrump()
     bidRound = true
 end
