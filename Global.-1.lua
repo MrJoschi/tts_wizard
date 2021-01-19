@@ -1,4 +1,5 @@
 --#include ~/Documents/Tabletop Simulator Projects/tts_wizard/test
+require('modules.game.Game')
 
 deckGUID = "a92a97"
 deckZoneGUID = "a09ba8"
@@ -37,6 +38,8 @@ bidRound = false
 textPlayer = {}
 lastPlayer = false
 
+trump = nil
+
 --function onLoad()
 
 -- <button
@@ -69,9 +72,14 @@ lastPlayer = false
 --     print(color)
 --     print(alt_click)
 -- end
+local game = nil
 
 function onLoad()
-    deckZone = getObjectFromGUID(deckZoneGUID)
+    game = Game:new()
+
+    game:start()
+
+    -- deckZone = getObjectFromGUID(deckZoneGUID)
     deck = getObjectFromGUID(deckGUID)
     deck.interactable = false
     playZone = getObjectFromGUID(playZoneGUID)
@@ -83,10 +91,6 @@ function onLoad()
     for player, GUID in pairs(counterGUID) do
       getObjectFromGUID(GUID).interactable = false
     end
-end
-
-function waitForTrump()
-    Wait.frames(setTrump, 10)
 end
 
 function selectTrump()
@@ -108,15 +112,15 @@ function interpretTrump()
     end
 end
 
-function setTrump()
-    local deckZoneObjects = deckZone.getObjects()
-    for _, item in ipairs(deckZoneObjects) do
-        if item.tag == "Card" then
-            trump = item.getName()
-        end
-    end
-    interpretTrump()
-end
+-- function setTrump()
+--     local deckZoneObjects = deckZone.getObjects()
+--     for _, item in ipairs(deckZoneObjects) do
+--         if item.tag == "Card" then
+--             trump = item.getName()
+--         end
+--     end
+--     interpretTrump()
+-- end
 
 function setTricksToZero()
     for i = 1, numberOfPlayers, 1 do
@@ -288,6 +292,10 @@ end
 
 function callbackFlippedCard(flippedCard)
     flippedCard.interactable = false
+    
+    game:setTrump()
+    
+    bidRound = true
 end
 
 function startRound()
@@ -298,9 +306,8 @@ function startRound()
     deck.deal(round)
     -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
     local deckPos = deck.getPosition()
-    deck.takeObject({flip = true, position = deckPos, callback_function = function(obj) callbackFlippedCard(obj) end})
-    waitForTrump()
-    bidRound = true
+
+    deck.takeObject({flip = true, position = deckPos, callback_function = callbackFlippedCard} )
 end
 
 function setPointsToZero()
