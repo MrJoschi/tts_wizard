@@ -1,12 +1,15 @@
 Game = {}
 
-function Game:new()
-    setmetatable({}, self)
+function Game:new(name)
+    local instance = {}
     self.__index = self
+    setmetatable(instance, self)
 
-    self.deckZone = getObjectFromGUID(deckZoneGUID)
+    instance.deckZone = getObjectFromGUID(deckZoneGUID)
 
-    return self
+    instance.name = name
+
+    return instance
 end
 
 function Game:start()
@@ -24,11 +27,13 @@ function Game:setTrump()
 
     interpretTrump()
 end
------------------------------------
--- local wizard = Game:new('wizard')
--- local bohnanza = Game:new('bohnanza')
 
--- print(wizard.name)
--- print(bohnanza.name)
--- wizard:start()
--- bohnanza:start()
+local wizard = Game:new('wizard')
+local bohnanza = Game:new('bohnanza')
+
+print(wizard.name)
+print(bohnanza.name)
+wizard:start()
+bohnanza:start()
+
+-- return Game
