@@ -2,7 +2,7 @@
 
 <Defaults>
     <Text fontSize = "20" fontStyle = "Bold" alignment = "MiddleCenter"/>
-    <TableLayout width="300" height="40" RectAlignment="UpperCenter" offsetXY="0 -80" cellPadding="0" color="#282828" cellBackgroundColor="Black"/>
+    <TableLayout width="300" height="40" RectAlignment="UpperCenter" offsetXY="0 -80" color="#282828" cellBackgroundColor="Black"/>
     <Row dontUseTableRowBackground="true" preferredHeight="40" active="true"/>
 </Defaults>
 
@@ -16,9 +16,9 @@
     <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
 </VerticalLayout> -->
 
-<TableLayout id="ScoreBoard" width="200" RectAlignment="MiddleRight" offsetXY="-5 0" columnWidths="0 50" Height="240" active="false">
+<TableLayout id="ScoreBoard" width="200" RectAlignment="MiddleRight" offsetXY="-5 0" columnWidths="0 50" Height="240" active="false" cellPadding="10 10 0 0"> 
     <Row>
-        <Cell>
+        <Cell> 
             <Text alignment = "MiddleLeft" id = "ScoreboardPlayer1" text = ""></Text>
         </Cell>
         <Cell>

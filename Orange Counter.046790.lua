@@ -1,5 +1,3 @@
---Orange Counter
-function bid()
-    --counterValue
-    Global.call("bid", {counterPlayer = "Orange", counterValue = self.getValue()})
+function bid(player)
+    Global.call("bid", {counterObject = self,  counterPlayer = player.color, counterValue = self.getValue()})
 end

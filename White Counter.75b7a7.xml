@@ -3,6 +3,10 @@
     position="0 22 -24"
     width="50"
     height="20"
-    fontSize="17">
+    fontSize="17"
+    interactable="false"
+    id="bidButton"
+    colors="#282828|#282828|#282828|#282828"
+    textColor="#FFFFFF">
     Bid
 </button>

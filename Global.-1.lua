@@ -37,17 +37,13 @@ bidRound = false
 textPlayer = {}
 lastPlayer = false
 
---function onLoad()
+-- function bidButtonReturn(obj, color, alt_click)
+--     print(obj)
+--     print(color)
+--     print(alt_click)
+-- end
 
--- <button
---     onClick="bid"
---     position="0 22 -24"
---     width="50"
---     height="20"
---     fontSize="17">
---     Bid
--- </button>
---
+-- function createBidButton(buttonObject)
 --     params = {
 --         click_function = "bidButtonReturn",
 --         --function_owner = self,
@@ -57,17 +53,11 @@ lastPlayer = false
 --         width          = 50,
 --         height         = 20,
 --         font_size      = 17,
---         color          = {0.5, 0.5, 0.5},
---         font_color     = {1, 1, 1},
+--         --color          = {0.5, 0.5, 0.5},
+--         --font_color     = {1, 1, 1},
 --         tooltip        = "This text appears on mouseover.",
 --     }
---     self.createButton(params)
--- end
---
--- function bidButtonReturn(obj, color, alt_click)
---     print(obj)
---     print(color)
---     print(alt_click)
+--     buttonObject.createButton(params)
 -- end
 
 function onLoad()
@@ -94,7 +84,7 @@ function selectTrump()
     if previousPlayerNumber == 0 then
        previousPlayerNumber = numberOfPlayers
     end
-    broadcastToAll("Spieler "..playerList[previousPlayerNumber].." darf bestimmen, welche Farbe diese Runde Trumpf ist", "Red")
+    broadcastToAll(Player[playerList[previousPlayerNumber]].steam_name.." can decide which suit is trump this round!", "Red")
 end
 
 function interpretTrump()
@@ -160,56 +150,67 @@ function tableContains(table, element)
     return false
 end
 
-function clearCounter(counter)
+function convertCounterToColor(counterObject)
     for player, GUID in pairs(counterGUID) do
-        if player == counter then
-            getObjectFromGUID(GUID).Counter.clear()
+        local objectFromCounterGUID = getObjectFromGUID(GUID)
+        if objectFromCounterGUID == counterObject then
+            return player
         end
     end
+    return nil
 end
 
-function bid(counterParams)
-    if bidRound == false then
-        broadcastToColor("It's not time to bid for tricks!", counterParams.counterPlayer, "Red")
-    else
-        if waitForSelectTrump == true then
-            local previousPlayerNumber = startPlayerNumber - 1
-            if previousPlayerNumber == 0 then
-               previousPlayerNumber = numberOfPlayers
-            end
-            broadcastToColor(Player[playerList[previousPlayerNumber]].steam_name.." has to determine trump.", counterParams.counterPlayer, "Red")
-            return
-        end
-        if activePlayer == counterParams.counterPlayer then
-            if counterParams.counterValue < 0 then
-                broadcastToColor("Negative bids are not allowed!", counterParams.counterPlayer, "Red")
-                clearCounter(counterParams.counterPlayer)
-            elseif counterParams.counterValue > round then
-                broadcastToColor("You don't have that many cards!", counterParams.counterPlayer, "Red")
-                clearCounter(counterParams.counterPlayer)
-            else
-                bids[activePlayerNumber] = counterParams.counterValue
-                if lastPlayer == true then
-                    local bidsTotal = 0
-                    for i = 1, numberOfPlayers, 1 do
-                        bidsTotal = bidsTotal + bids[i]
-                    end
-                    if bidsTotal == round then
-                        broadcastToColor("The total tricks must not equal the number of cards handed out this round. Please change your bid!", counterParams.counterPlayer, "Red")
-                        return
-                    end
+function bid(counterParameters)
+    local counterColor = convertCounterToColor(counterParameters.counterObject)
+    if counterParameters.counterPlayer ~= counterColor then
+        broadcastToColor("Hands off from "..Player[counterColor].steam_name.."'s Bid-Button!", counterParameters.counterPlayer, "Red")
+    else   
+        if bidRound == false then
+            broadcastToColor("It's not time to bid for tricks!", counterParameters.counterPlayer, "Red")
+        else
+            if waitForSelectTrump == true then
+                local previousPlayerNumber = startPlayerNumber - 1
+                if previousPlayerNumber == 0 then
+                previousPlayerNumber = numberOfPlayers
                 end
-                textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
-                nextActivePlayer()
+                broadcastToColor(Player[playerList[previousPlayerNumber]].steam_name.." has to determine trump.", counterParameters.counterPlayer, "Red")
+                return
+            end
+            if activePlayer == counterParameters.counterPlayer then
+                if counterParameters.counterValue < 0 then
+                    broadcastToColor("Negative bids are not allowed!", counterParameters.counterPlayer, "Red")
+                    counterParameters.counterObject.Counter.clear()
+                elseif counterParameters.counterValue > round then
+                    broadcastToColor("You don't have that many cards!", counterParameters.counterPlayer, "Red")
+                    counterParameters.counterObject.Counter.clear()
+                else
+                    bids[activePlayerNumber] = counterParameters.counterValue
+                    if lastPlayer == true then
+                        local bidsTotal = 0
+                        for i = 1, numberOfPlayers, 1 do
+                            bidsTotal = bidsTotal + bids[i]
+                        end
+                        if bidsTotal == round then
+                            broadcastToColor("The total tricks must not equal the number of cards handed out this round. Please change your bid!", counterParameters.counterPlayer, "Red")
+                            return
+                        end
+                    end
+                    textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
+                    nextActivePlayer()
+                end
             end
         end
     end
 end
 
-function destroyUnusedCounters()
+function prepareCounters()
     for player, GUID in pairs(counterGUID) do
           if tableContains(playerList, player) == false then
             destroyObject(getObjectFromGUID(GUID))
+          else 
+            getObjectFromGUID(GUID).UI.setAttribute("bidButton", "interactable", true)
+            getObjectFromGUID(GUID).UI.setAttribute("bidButton", "textColor", "#FFFFFF")
+            getObjectFromGUID(GUID).Counter.clear()
           end
     end
 end
@@ -273,7 +274,7 @@ function writeScoreboard()
 end
 
 function setupTheGame()
-    destroyUnusedCounters()
+    prepareCounters()
     randomStartPlayer()
     writePointblockHeadlines()
     round = 0
@@ -490,7 +491,7 @@ function onObjectDrop(droppingPlayer, droppedCard)
                 local suit = droppedCard.getName()
 
                 --Ausspielen von Spieler der nicht am Zug ist
-                if droppingPlayer != activePlayer then
+                if droppingPlayer ~= activePlayer then
                     broadcastToColor("It is not your turn! It is "..activePlayer.."'s turn.", droppingPlayer, "Red")
                     droppedCard.deal(1, droppingPlayer)
 
@@ -589,15 +590,6 @@ function printTurn(player)
 end
 
 function onChat(message, player)
-    log(counterGUID.White, "counterGUID")
-    log(round, "round")
-    log(activePlayer, "activePlayer")
-    log(activePlayerNumber, "activePlayerNumber")
-    log(startPlayerRound, "startPlayerRound")
-    log(startPlayerTrick, "startPlayerTrick")
-    log(startPlayerNumber, "startPlayerNumber")
-    log(bestCardPlayer, "bestCardPlayer")
-    log(bestCardPlayerNumber, "bestCardPlayerNumber")
     if waitForSelectTrump == true then
         local previousPlayerNumber = startPlayerNumber - 1
         if previousPlayerNumber == 0 then
