@@ -1,4 +1,4 @@
-Game = {}
+local Game = {}
 
 function Game:new(name)
     local instance = {}
@@ -36,4 +36,4 @@ print(bohnanza.name)
 wizard:start()
 bohnanza:start()
 
--- return Game
+return Game
