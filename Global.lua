@@ -2,8 +2,6 @@ local Game = require 'modules.game.Game'
 local Table = require 'modules.board.Board'
 
 deckGUID = "a92a97"
-deckZoneGUID = "a09ba8"
-playZoneGUID = "aa5aa2"
 
 counterGUID = {
     White = "75b7a7",
@@ -16,26 +14,12 @@ counterGUID = {
     Pink = "80d397"
   }
 
-textPlayerGUID = {}
-
-textPlayerGUID[1] = "f009aa"
-textPlayerGUID[2] = "8c7d09"
-textPlayerGUID[3] = "16778e"
-textPlayerGUID[4] = "1d529f"
-textPlayerGUID[5] = "2cb93a"
-textPlayerGUID[6] = "6c27f2"
-
-textPointsGUID = "65e97f"
-
-pointblockGUID = "2d4bf2"
-
 logToAll = true
 minPlayerNumber = 1
 tricks = {}
 points = {}
 bids = {}
 bidRound = false
-textPlayer = {}
 lastPlayer = false
 
 trump = nil
@@ -77,19 +61,6 @@ function onLoad()
     game = Game:new()
 
     game:start()
-
-    deckZone = getObjectFromGUID(deckZoneGUID)
-    deck = getObjectFromGUID(deckGUID)
-    deck.interactable = false
-    playZone = getObjectFromGUID(playZoneGUID)
-    for i = 1, 6, 1 do
-        textPlayer[i] = getObjectFromGUID(textPlayerGUID[i])
-    end
-    textPointsOrigin = getObjectFromGUID(textPointsGUID)
-    getObjectFromGUID(pointblockGUID).interactable = false
-    for player, GUID in pairs(counterGUID) do
-      getObjectFromGUID(GUID).interactable = false
-    end
 end
 
 function selectTrump()

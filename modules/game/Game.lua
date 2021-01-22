@@ -1,15 +1,28 @@
+local Board = require "modules.board.board"
+local ScoreTable = require "modules.score.scoretable"
+local ScoreBoard = require "modules.score.scoreboard"
+local CounterManager = require "modules.counter.countermanager"
+local PlayerManager = require "modules.player.playermanager"
+
 local Game = {}
 
-function Game:new(name)
+function Game:new()
     local instance = {}
     self.__index = self
     setmetatable(instance, self)
 
-    instance.deckZone = getObjectFromGUID(deckZoneGUID)
+    instance.board = Board:new()
+    instance.scoreTable = ScoreTable:new()
+    instance.scoreBoard = ScoreBoard:new()
+    instance.counterManager = CounterManager:new()
+    instance.playerManager = PlayerManager:new()
 
-    instance.name = name
+    instance:init()
 
     return instance
+end
+
+function Game:init()
 end
 
 function Game:start()
@@ -17,7 +30,7 @@ function Game:start()
 end
 
 function Game:setTrump()
-    local deckZoneObjects = self.deckZone.getObjects()
+    local deckZoneObjects = self.board.deckZone.getObjects()
 
     for _, item in ipairs(deckZoneObjects) do
         if item.tag == "Card" then
@@ -27,13 +40,5 @@ function Game:setTrump()
 
     interpretTrump()
 end
-
-local wizard = Game:new('wizard')
-local bohnanza = Game:new('bohnanza')
-
-print(wizard.name)
-print(bohnanza.name)
-wizard:start()
-bohnanza:start()
 
 return Game
