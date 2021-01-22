@@ -1,5 +1,5 @@
---#include ~/Documents/Tabletop Simulator Projects/tts_wizard/test
-require('modules.game.Game')
+local Game = require 'modules.game.Game'
+local Table = require 'modules.board.Board'
 
 deckGUID = "a92a97"
 deckZoneGUID = "a09ba8"
@@ -73,13 +73,12 @@ trump = nil
 --     print(alt_click)
 -- end
 local game = nil
-
 function onLoad()
     game = Game:new()
 
     game:start()
 
-    -- deckZone = getObjectFromGUID(deckZoneGUID)
+    deckZone = getObjectFromGUID(deckZoneGUID)
     deck = getObjectFromGUID(deckGUID)
     deck.interactable = false
     playZone = getObjectFromGUID(playZoneGUID)
