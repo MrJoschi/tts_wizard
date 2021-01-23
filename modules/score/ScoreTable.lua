@@ -64,13 +64,14 @@ end
 function ScoreTable:initTextBids()
     self.textBids = {}   -- create the matrix
     local numberOfPlayers = PlayerManager.getNumberOfPlayers()
+    local playersArray = PlayerManager.getPlayersArray()
 
-    for i = 1, numberOfPlayers do
+    for i, player in pairs(playersArray) do
         -- for i = 1, 6 do
-            self.textBids[i] = {}     -- create a new row
+            self.textBids[player] = {}     -- create a new row
         for j = 1, 60 / numberOfPlayers do
             -- for j = 1, 20 do
-                self.textBids[i][j] = self.textPointsOrigin.clone({
+                self.textBids[player][j] = self.textPointsOrigin.clone({
                 position     = {x = -19.68 + 2.34 * i, y = -4.1, z = 8.24 - 0.903 * j} --y-Koordinate ist ein Bug
             })
         end

@@ -30,7 +30,7 @@ local PlayerManager = {
     getPlayersArray = function()
         return playersArray
     end,
-    hasPlayer = function(player)
+    hasPlayer = function(self, player)
         return players[player] ~= nil
     end,
     getNumberOfPlayers = function()
@@ -39,6 +39,37 @@ local PlayerManager = {
     getRandomPlayer = function()
         local randomNumber = math.random(1, numberOfPlayers)
         return playersArray[randomNumber]
+    end,
+    getName = function(player)
+        return Player[player].steam_name
+    end,
+    getNextPlayer = function(self, currentPlayer)
+        local index = self.getIndexOfPlayer(currentPlayer)
+        local indexNextPlayer = index + 1
+
+        if indexNextPlayer > numberOfPlayers then
+            indexNextPlayer = 1
+        end
+
+        return playersArray[indexNextPlayer]
+    end,
+    getPreviousPlayer = function(self, currentPlayer)
+        local index = self.getIndexOfPlayer(currentPlayer)
+
+        local indexNextPlayer = index - 1
+
+        if indexNextPlayer == 0 then
+            indexNextPlayer = numberOfPlayers
+        end
+
+        return playersArray[indexNextPlayer]
+    end,
+    getIndexOfPlayer = function(playerPassed)
+        for index, player in pairs(playersArray) do
+            if (playerPassed == player) then
+                return index
+            end
+        end
     end,
 }
 

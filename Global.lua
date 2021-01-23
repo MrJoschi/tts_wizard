@@ -13,7 +13,6 @@ counterGUID = {
   }
 
 logToAll = true
-bids = {}
 bidRound = false
 lastPlayer = false
 
@@ -61,6 +60,10 @@ function startGame()
     return game:start()
 end
 
+function bid(counterParams)
+    return game:bid(counterParams)
+end
+
 -- function setTrump()
 --     local deckZoneObjects = deckZone.getObjects()
 --     for _, item in ipairs(deckZoneObjects) do
@@ -75,44 +78,6 @@ function clearCounter(counter)
     for player, GUID in pairs(counterGUID) do
         if player == counter then
             getObjectFromGUID(GUID).Counter.clear()
-        end
-    end
-end
-
-function bid(counterParams)
-    if bidRound == false then
-        broadcastToColor("It's not time to bid for tricks!", counterParams.counterPlayer, "Red")
-    else
-        if waitForSelectTrump == true then
-            local previousPlayerNumber = startPlayerNumber - 1
-            if previousPlayerNumber == 0 then
-               previousPlayerNumber = numberOfPlayers
-            end
-            broadcastToColor(Player[playerList[previousPlayerNumber]].steam_name.." has to determine trump.", counterParams.counterPlayer, "Red")
-            return
-        end
-        if activePlayer == counterParams.counterPlayer then
-            if counterParams.counterValue < 0 then
-                broadcastToColor("Negative bids are not allowed!", counterParams.counterPlayer, "Red")
-                clearCounter(counterParams.counterPlayer)
-            elseif counterParams.counterValue > round then
-                broadcastToColor("You don't have that many cards!", counterParams.counterPlayer, "Red")
-                clearCounter(counterParams.counterPlayer)
-            else
-                bids[activePlayerNumber] = counterParams.counterValue
-                if lastPlayer == true then
-                    local bidsTotal = 0
-                    for i = 1, numberOfPlayers, 1 do
-                        bidsTotal = bidsTotal + bids[i]
-                    end
-                    if bidsTotal == round then
-                        broadcastToColor("The total tricks must not equal the number of cards handed out this round. Please change your bid!", counterParams.counterPlayer, "Red")
-                        return
-                    end
-                end
-                textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
-                nextActivePlayer()
-            end
         end
     end
 end
@@ -214,27 +179,6 @@ function endTrick()
     activePlayer = bestCardPlayer
     activePlayerNumber = bestCardPlayerNumber
     countTricks()
-end
-
-function nextActivePlayer()
-    activePlayerNumber = activePlayerNumber % numberOfPlayers + 1
-    activePlayer = playerList[activePlayerNumber]
-    if playerList[activePlayerNumber % numberOfPlayers + 1] == startPlayerTrick then
-        lastPlayer = true
-        printTurn(activePlayer)
-    else
-        lastPlayer = false
-        if activePlayer == startPlayerTrick then
-            if bidRound == true then
-                bidRound = false
-                printTurn(activePlayer)
-            else
-                endTrick()
-            end
-        else
-            printTurn(activePlayer)
-        end
-    end
 end
 
 function detectBestCardPlayerNumber()

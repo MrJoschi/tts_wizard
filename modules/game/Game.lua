@@ -37,6 +37,7 @@ function Game:start()
         self.round = 0
         self.startPlayer = nil
         self.trump = nil
+        self.bids = {}
 
         self:setStartPlayer()
         self:clearPoints()
@@ -80,11 +81,55 @@ end
 
 function Game:initVariables()
     activePlayer = self.startPlayer
-    -- startPlayerTrick = startPlayerRound
+    startPlayerTrick = activePlayer
     self:printTurn(activePlayer)
     self:setTricksToZero()
     self.round = self.round + 1
+
+    self:getNextPlayer()
 end
+
+
+function Game:bid(counterParams)
+    if bidRound == false then
+        broadcastToColor("It's not time to bid for tricks!", counterParams.counterPlayer, "Red")
+    else
+        if waitForSelectTrump == true then
+            local previousPlayerNumber = startPlayerNumber - 1
+            if previousPlayerNumber == 0 then
+               previousPlayerNumber = PlayerManager.getNumberOfPlayers()
+            end
+            broadcastToColor(Player[playerList[previousPlayerNumber]].steam_name.." has to determine trump.", counterParams.counterPlayer, "Red")
+            return
+        end
+        if activePlayer == counterParams.counterPlayer then
+            if counterParams.counterValue < 0 then
+                broadcastToColor("Negative bids are not allowed!", counterParams.counterPlayer, "Red")
+                clearCounter(counterParams.counterPlayer)
+            elseif counterParams.counterValue > self.round then
+                broadcastToColor("You don't have that many cards!", counterParams.counterPlayer, "Red")
+                clearCounter(counterParams.counterPlayer)
+            else
+                self.bids[activePlayer] = counterParams.counterValue
+                if lastPlayer == true then
+                    local bidsTotal = 0
+                    for i = 1, PlayerManager.getNumberOfPlayers(), 1 do
+                        bidsTotal = bidsTotal + self.bids[i]
+                    end
+                    if bidsTotal == self.round then
+                        broadcastToColor("The total tricks must not equal the number of cards handed out this round. Please change your bid!", counterParams.counterPlayer, "Red")
+                        return
+                    end
+                end
+
+                --Todo auslagern
+                self.scoreTable.textBids[activePlayer][self.round].setValue(tostring(self.bids[activePlayer]))
+                self:nextActivePlayer()
+            end
+        end
+    end
+end
+
 
 function Game:setTricksToZero()
     for i = 1, PlayerManager.getNumberOfPlayers(), 1 do
@@ -101,6 +146,7 @@ function Game:clearPoints()
     end
 end
 
+---Trump
 function Game:setTrump()
     local deckZoneObjects = self.board.deckZone.getObjects()
 
@@ -120,23 +166,51 @@ function Game:interpretTrump()
         self.trump = "null"
     elseif self.trump == "Z" then
             waitForSelectTrump = true
-            selectTrump()
+            self:selectTrump()
     end
 end
 
 function Game:selectTrump()
-    local previousPlayerNumber = startPlayerNumber - 1
-    if previousPlayerNumber == 0 then
-       previousPlayerNumber = numberOfPlayers
+    local previousPlayer = self:getPreviousPlayer()
+    broadcastToAll("Spieler "..PlayerManager.getName(previousPlayer).." darf bestimmen, welche Farbe diese Runde Trumpf ist", "Red")
+end
+
+---Player
+function Game:nextActivePlayer()
+    activePlayer = self:getNextPlayer()
+
+    if activePlayer == startPlayerTrick then
+        lastPlayer = true
+        printTurn(activePlayer)
+    else
+        lastPlayer = false
+        if activePlayer == startPlayerTrick then
+            if bidRound == true then
+                bidRound = false
+                printTurn(activePlayer)
+            else
+                endTrick()
+            end
+        else
+            printTurn(activePlayer)
+        end
     end
-    broadcastToAll("Spieler "..playerList[previousPlayerNumber].." darf bestimmen, welche Farbe diese Runde Trumpf ist", "Red")
 end
 
 function Game:setStartPlayer()
     self.startPlayer = PlayerManager:getRandomPlayer()
-    broadcastToAll(Player[self.startPlayer].steam_name.." is randomly chosen as starting player", self.startPlayer)
+    broadcastToAll(PlayerManager.getName(self.startPlayer).." is randomly chosen as starting player", self.startPlayer)
 end
 
+function Game:getNextPlayer()
+    return PlayerManager:getNextPlayer(activePlayer)
+end
+
+function Game:getPreviousPlayer()
+    return PlayerManager:getPreviousPlayer(activePlayer)
+end
+
+---Misc
 function Game:printTurn(player)
     UI.setAttributes("TurnText", {text = Player[player].steam_name.."'s Turn", color = player})
     printToAll("<--------------------- "..Player[player].steam_name.."'s Turn --------------------->", player)
