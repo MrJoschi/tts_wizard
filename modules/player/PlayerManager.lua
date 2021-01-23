@@ -7,6 +7,7 @@ function PlayerManager:new()
     self.__index = self
     setmetatable(instance, self)
 
+    instance.playersArray = {}
     instance.players = {}
     instance.numberOfPlayers = 0
 
@@ -19,9 +20,10 @@ function PlayerManager:init()
 end
 
 function PlayerManager:setPlayerNumber()
+    self.playersArray = getSeatedPlayers()
     self.players = {}
 
-    for id, player in pairs(getSeatedPlayers()) do
+    for id, player in pairs(self.playersArray) do
         self.players[player] = player
     end
 
@@ -42,6 +44,11 @@ end
 
 function PlayerManager:getNumberOfPlayers()
     return self.numberOfPlayers
+end
+
+function PlayerManager:getRandomPlayer()
+    local randomNumber = math.random(1, self:getNumberOfPlayers())
+    return self.playersArray[randomNumber]
 end
 
 return PlayerManager

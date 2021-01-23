@@ -101,12 +101,6 @@ function setTricksToZero()
     tricksTotal = 0
 end
 
-function randomStartPlayer()
-    startPlayerNumber = math.random(1, numberOfPlayers)
-    startPlayerRound = playerList[startPlayerNumber]
-    broadcastToAll(Player[startPlayerRound].steam_name.." is randomly chosen as starting player", startPlayerRound)
-end
-
 function setStartRoundVar()
     activePlayerNumber = startPlayerNumber
     activePlayer = startPlayerRound

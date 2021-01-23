@@ -17,6 +17,8 @@ function Game:new()
     instance.playerManager = PlayerManager:new()
     instance.counterManager = CounterManager:new(instance.playerManager)
 
+    instance.startPlayer = nil
+
     instance:init()
 
     return instance
@@ -28,7 +30,7 @@ end
 function Game:start()
     if self.playerManager:setPlayerNumber() then
         self.counterManager:destroyUnusedCounters()
-        -- randomStartPlayer()
+        self:setStartPlayer()
         -- writePointblockHeadlines()
         -- round = 0
         -- setPointsToZero()
@@ -53,6 +55,11 @@ function Game:setTrump()
     end
 
     interpretTrump()
+end
+
+function Game:setStartPlayer()
+    self.startPlayer = self.playerManager:getRandomPlayer()
+    broadcastToAll(Player[self.startPlayer].steam_name.." is randomly chosen as starting player", self.startPlayer)
 end
 
 return Game
