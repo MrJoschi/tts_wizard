@@ -15,7 +15,6 @@ counterGUID = {
   }
 
 logToAll = true
-minPlayerNumber = 1
 tricks = {}
 points = {}
 bids = {}
@@ -56,11 +55,14 @@ trump = nil
 --     print(color)
 --     print(alt_click)
 -- end
-local game = nil
+game = nil
+
 function onLoad()
     game = Game:new()
+end
 
-    game:start()
+function startGame()
+    return game:start()
 end
 
 function selectTrump()
@@ -99,17 +101,6 @@ function setTricksToZero()
     tricksTotal = 0
 end
 
-function setPlayerNumber()
-    playerList = getSeatedPlayers()
-    numberOfPlayers = #playerList
-    if numberOfPlayers < minPlayerNumber or numberOfPlayers > 6 then
-        broadcastToAll("Dieses Spiel ist nur für 3-6 Spieler!", "Red")
-        return false
-    end
-    broadcastToAll("You are playing with "..numberOfPlayers.." players", "Green")
-    return true
-end
-
 function randomStartPlayer()
     startPlayerNumber = math.random(1, numberOfPlayers)
     startPlayerRound = playerList[startPlayerNumber]
@@ -123,15 +114,6 @@ function setStartRoundVar()
     printTurn(activePlayer)
     setTricksToZero()
     round = round + 1
-end
-
-function tableContains(table, element)
-    for _, item in ipairs(table) do
-        if item == element then
-          return true
-        end
-    end
-    return false
 end
 
 function clearCounter(counter)
@@ -177,14 +159,6 @@ function bid(counterParams)
                 nextActivePlayer()
             end
         end
-    end
-end
-
-function destroyUnusedCounters()
-    for player, GUID in pairs(counterGUID) do
-          if tableContains(playerList, player) == false then
-            destroyObject(getObjectFromGUID(GUID))
-          end
     end
 end
 
@@ -244,20 +218,6 @@ function writeScoreboard()
         UI.setAttributes("ScoreboardPlayer"..i, {color = playerList[i], text = Player[playerList[i]].steam_name})
         UI.setAttributes("ScoreboardPoints"..i, {color = playerList[i], text = points[i]})
     end
-end
-
-function setupTheGame()
-    destroyUnusedCounters()
-    randomStartPlayer()
-    writePointblockHeadlines()
-    round = 0
-    setPointsToZero()
-    setTextPoints()
-    setTextBids()
-    turnOnTurnScreen()
-    turnOnScoreboard()
-    writeScoreboard()
-    startRound()
 end
 
 function callbackFlippedCard(flippedCard)

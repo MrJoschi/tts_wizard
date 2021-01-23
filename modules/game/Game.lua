@@ -14,8 +14,8 @@ function Game:new()
     instance.board = Board:new()
     instance.scoreTable = ScoreTable:new()
     instance.scoreBoard = ScoreBoard:new()
-    instance.counterManager = CounterManager:new()
     instance.playerManager = PlayerManager:new()
+    instance.counterManager = CounterManager:new(instance.playerManager)
 
     instance:init()
 
@@ -26,7 +26,21 @@ function Game:init()
 end
 
 function Game:start()
-    print('das game ist gestartet')
+    if self.playerManager:setPlayerNumber() then
+        self.counterManager:destroyUnusedCounters()
+        -- randomStartPlayer()
+        -- writePointblockHeadlines()
+        -- round = 0
+        -- setPointsToZero()
+        -- setTextPoints()
+        -- setTextBids()
+        -- turnOnTurnScreen()
+        -- turnOnScoreboard()
+        -- writeScoreboard()
+        -- startRound()
+    end
+
+    return false
 end
 
 function Game:setTrump()

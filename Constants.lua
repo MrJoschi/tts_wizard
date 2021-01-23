@@ -1,5 +1,8 @@
-local ScoreBoard = require "modules.score.scoreboard"
 local Constants = {
+    Config = {
+        countPlayerMin = 1,
+        countPlayerMax = 6,
+    },
     Guid = {
         Board = {
             Deck = "a92a97",
