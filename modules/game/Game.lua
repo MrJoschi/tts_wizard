@@ -4,6 +4,7 @@ local ScoreBoard = require "modules.score.scoreboard"
 local CounterManager = require "modules.counter.countermanager"
 local PlayerManager = require "modules.player.playermanager"
 local Constants = require "constants"
+local UIManager = require "modules.ui.uimanager"
 
 local Game = {}
 
@@ -38,7 +39,6 @@ function Game:start()
         self.startPlayer = nil
         self.trump = nil
         self.bids = {}
-
         self:setStartPlayer()
         self:clearPoints()
 
@@ -47,8 +47,7 @@ function Game:start()
 
         CounterManager:destroyUnusedCounters()
 
-        UI.setAttribute("TurnScreen", "active", "true")
-        UI.setAttribute("Scoreboard", "active", "true")
+        UIManager:init()
 
         self:startRound()
     end
@@ -181,18 +180,18 @@ function Game:nextActivePlayer()
 
     if activePlayer == startPlayerTrick then
         lastPlayer = true
-        printTurn(activePlayer)
+        self:printTurn(activePlayer)
     else
         lastPlayer = false
         if activePlayer == startPlayerTrick then
             if bidRound == true then
                 bidRound = false
-                printTurn(activePlayer)
+                self:printTurn(activePlayer)
             else
                 endTrick()
             end
         else
-            printTurn(activePlayer)
+            self:printTurn(activePlayer)
         end
     end
 end

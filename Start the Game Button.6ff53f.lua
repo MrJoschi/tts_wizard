@@ -1,6 +1,5 @@
 function startTheGame()
-    if Global.call("setPlayerNumber") then
-        Global.call("setupTheGame")
+    if Global.call("startGame") then
         destroyObject(self)
     end
 end
