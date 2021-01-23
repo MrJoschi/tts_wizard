@@ -5,6 +5,8 @@
     height="20"
     fontSize="17"
     interactable="false"
-    id="bidButton">
+    id="bidButton"
+    colors="#282828|#282828|#282828|#282828"
+    textColor="#FFFFFF">
     Bid
 </button>
