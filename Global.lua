@@ -1,8 +1,6 @@
 local Game = require 'modules.game.Game'
 local Table = require 'modules.board.Board'
 
-deckGUID = "a92a97"
-
 counterGUID = {
     White = "75b7a7",
     Red = "2dcca8",
@@ -15,8 +13,6 @@ counterGUID = {
   }
 
 logToAll = true
-tricks = {}
-points = {}
 bids = {}
 bidRound = false
 lastPlayer = false
@@ -65,25 +61,6 @@ function startGame()
     return game:start()
 end
 
-function selectTrump()
-    local previousPlayerNumber = startPlayerNumber - 1
-    if previousPlayerNumber == 0 then
-       previousPlayerNumber = numberOfPlayers
-    end
-    broadcastToAll("Spieler "..playerList[previousPlayerNumber].." darf bestimmen, welche Farbe diese Runde Trumpf ist", "Red")
-end
-
-function interpretTrump()
-    if trump == nil then
-        logToAllOrHost("Fehler bei Ermittlung Trumpf", "Red")
-    elseif trump == "N" then
-        trump = "null"
-    elseif trump == "Z" then
-            waitForSelectTrump = true
-            selectTrump()
-    end
-end
-
 -- function setTrump()
 --     local deckZoneObjects = deckZone.getObjects()
 --     for _, item in ipairs(deckZoneObjects) do
@@ -93,22 +70,6 @@ end
 --     end
 --     interpretTrump()
 -- end
-
-function setTricksToZero()
-    for i = 1, numberOfPlayers, 1 do
-        tricks[i] = 0
-    end
-    tricksTotal = 0
-end
-
-function setStartRoundVar()
-    activePlayerNumber = startPlayerNumber
-    activePlayer = startPlayerRound
-    startPlayerTrick = startPlayerRound
-    printTurn(activePlayer)
-    setTricksToZero()
-    round = round + 1
-end
 
 function clearCounter(counter)
     for player, GUID in pairs(counterGUID) do
@@ -161,26 +122,6 @@ function writePoints()
         textPoints[i][round].setValue(tostring(points[i]))
         UI.setAttribute("ScoreboardPlayer"..i, "text", Player[playerList[i]].steam_name..": "..points[i])
     end
-end
-
-function callbackFlippedCard(flippedCard)
-    flippedCard.interactable = false
-    
-    game:setTrump()
-    
-    bidRound = true
-end
-
-function startRound()
-    setStartRoundVar()
-    local deck = getObjectFromGUID(deckGUID)
-    -- Deck wird gemischt und die erste Karte wird ausgeteilt
-    deck.randomize()
-    deck.deal(round)
-    -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
-    local deckPos = deck.getPosition()
-
-    deck.takeObject({flip = true, position = deckPos, callback_function = callbackFlippedCard} )
 end
 
 function countPoints()
