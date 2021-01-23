@@ -31,14 +31,17 @@ end
 function Game:start()
     if PlayerManager:setPlayerNumber() then
         self.round = 0
+        
+        self:setStartPlayer()
+        self:clearPoints()
+
+        self.scoreTable:reset()
+        self.scoreBoard:reset()
 
         CounterManager:destroyUnusedCounters()
-        self:setStartPlayer()
-        self.scoreTable:reset()
-        self:clearPoints()
-        -- turnOnTurnScreen()
-        -- turnOnScoreboard()
-        -- writeScoreboard()
+        
+        UI.setAttribute("TurnScreen", "active", "true")
+        UI.setAttribute("Scoreboard", "active", "true")
         -- startRound()
     end
 

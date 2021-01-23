@@ -163,17 +163,6 @@ function writePoints()
     end
 end
 
-function turnOnScoreboard()
-  UI.setAttribute("Scoreboard", "active", "true")
-end
-
-function writeScoreboard()
-    for i = 1, numberOfPlayers, 1 do
-        UI.setAttributes("ScoreboardPlayer"..i, {color = playerList[i], text = Player[playerList[i]].steam_name})
-        UI.setAttributes("ScoreboardPoints"..i, {color = playerList[i], text = points[i]})
-    end
-end
-
 function callbackFlippedCard(flippedCard)
     flippedCard.interactable = false
     
@@ -462,10 +451,6 @@ function logToAllOrHost(text, color)
     else
         print(text)
     end
-end
-
-function turnOnTurnScreen()
-    UI.setAttribute("TurnScreen", "active", "true")
 end
 
 function printTurn(player)
