@@ -35,20 +35,27 @@ function ScoreTable:reset()
     self:initTextBids()
 end
 
+function ScoreTable:writePoints(round)
+    for index, player in pairs(PlayerManager:getPlayersArray()) do
+        self.textPoints[index][round].setValue(tostring(points[index]))
+        UI.setAttribute("ScoreboardPlayer"..index, "text", PlayerManager:getName(player)..": "..points[index])
+    end
+end
+
 function ScoreTable:writeHeadlines()
-    if PlayerManager.getNumberOfPlayers() < 6 then
-        for i = 6, PlayerManager.getNumberOfPlayers() + 1, -1 do
+    if PlayerManager:getNumberOfPlayers() < 6 then
+        for i = 6, PlayerManager:getNumberOfPlayers() + 1, -1 do
             self.textPlayer[i].destruct()
         end
     end
-    for index, player in pairs(PlayerManager.getPlayersArray()) do
+    for index, player in pairs(PlayerManager:getPlayersArray()) do
         self.textPlayer[index].setValue(Player[player].steam_name)
     end
 end
 
 function ScoreTable:initTextPoints()
     self.textPoints = {}   -- create the matrix
-    local numberOfPlayers = PlayerManager.getNumberOfPlayers()
+    local numberOfPlayers = PlayerManager:getNumberOfPlayers()
 
     for i = 1, numberOfPlayers do
         self.textPoints[i] = {}     -- create a new row
@@ -63,8 +70,8 @@ end
 
 function ScoreTable:initTextBids()
     self.textBids = {}   -- create the matrix
-    local numberOfPlayers = PlayerManager.getNumberOfPlayers()
-    local playersArray = PlayerManager.getPlayersArray()
+    local numberOfPlayers = PlayerManager:getNumberOfPlayers()
+    local playersArray = PlayerManager:getPlayersArray()
 
     for i, player in pairs(playersArray) do
         -- for i = 1, 6 do

@@ -21,7 +21,7 @@ end
 
 function ScoreBoard:writeScoreboard(game)
     -- TODO game hier durchzuschleusen ist kacke, braucht man das hier wirklich?
-    for index, player in pairs(PlayerManager.getPlayersArray()) do
+    for index, player in pairs(PlayerManager:getPlayersArray()) do
         UI.setAttributes("ScoreboardPlayer"..index, {color = player, text = Player[player].steam_name})
         UI.setAttributes("ScoreboardPoints"..index, {color = player, text = game.points[index]})
     end

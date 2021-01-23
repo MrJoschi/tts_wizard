@@ -40,11 +40,11 @@ local PlayerManager = {
         local randomNumber = math.random(1, numberOfPlayers)
         return playersArray[randomNumber]
     end,
-    getName = function(player)
+    getName = function(self, player)
         return Player[player].steam_name
     end,
     getNextPlayer = function(self, currentPlayer)
-        local index = self.getIndexOfPlayer(currentPlayer)
+        local index = self:getIndexOfPlayer(currentPlayer)
         local indexNextPlayer = index + 1
 
         if indexNextPlayer > numberOfPlayers then
@@ -54,7 +54,7 @@ local PlayerManager = {
         return playersArray[indexNextPlayer]
     end,
     getPreviousPlayer = function(self, currentPlayer)
-        local index = self.getIndexOfPlayer(currentPlayer)
+        local index = self:getIndexOfPlayer(currentPlayer)
 
         local indexNextPlayer = index - 1
 
@@ -64,7 +64,7 @@ local PlayerManager = {
 
         return playersArray[indexNextPlayer]
     end,
-    getIndexOfPlayer = function(playerPassed)
+    getIndexOfPlayer = function(self, playerPassed)
         for index, player in pairs(playersArray) do
             if (playerPassed == player) then
                 return index

@@ -32,6 +32,12 @@ local Constants = {
             },
         },
     },
+    State = {
+        Pregame = "Pregame",
+        TrumpSelection = "TrumpSelection",
+        Bid = "Bid",
+        PlayCards = "PlayCards",
+    }
 }
 
 return Constants

@@ -17,6 +17,9 @@ local CounterManager = {
               end
         end
     end,
+    clearForPlayer = function(self, player)
+        getObjectFromGUID(Constants.Guid.Counter[player]).Counter.clear()
+    end,
 }
 
 return CounterManager
