@@ -163,19 +163,6 @@ function writePoints()
     end
 end
 
-function setTextPoints()
-  textPoints = {}   -- create the matrix
-  for i = 1, numberOfPlayers do
-      textPoints[i] = {}     -- create a new row
-      for j = 1, 60 / numberOfPlayers do
-      -- for j = 1, 20 do
-          textPoints[i][j] = textPointsOrigin.clone({
-            position     = {x = -20.84 + 2.34 * i, y = -4.1, z = 8.24 - 0.903 * j} --y-Koordinate ist ein Bug
-          })
-      end
-  end
-end
-
 function setTextBids()
   textBids = {}   -- create the matrix
   for i = 1, numberOfPlayers do
