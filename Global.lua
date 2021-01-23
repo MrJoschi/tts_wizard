@@ -221,12 +221,6 @@ function startRound()
     deck.takeObject({flip = true, position = deckPos, callback_function = callbackFlippedCard} )
 end
 
-function setPointsToZero()
-    for i = 1, numberOfPlayers, 1 do
-        points[i] = 0
-    end
-end
-
 function countPoints()
   for i = 1, numberOfPlayers, 1 do
       if bids[i] == tricks[i] then

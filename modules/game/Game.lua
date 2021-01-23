@@ -16,6 +16,8 @@ function Game:new()
     instance.scoreBoard = ScoreBoard:new()
 
     instance.startPlayer = nil
+    instance.round = 0
+    instance.points = {}
 
     instance:init()
 
@@ -28,11 +30,12 @@ end
 
 function Game:start()
     if PlayerManager:setPlayerNumber() then
+        self.round = 0
+
         CounterManager:destroyUnusedCounters()
         self:setStartPlayer()
         self.scoreTable:writeHeadlines()
-        -- round = 0
-        -- setPointsToZero()
+        self:clearPoints()
         -- setTextPoints()
         -- setTextBids()
         -- turnOnTurnScreen()
@@ -42,6 +45,14 @@ function Game:start()
     end
 
     return false
+end
+
+function Game:clearPoints()
+    self.points = {}
+
+    for player in pairs(PlayerManager.getPlayers()) do
+        self.points[player] = 0
+    end
 end
 
 function Game:setTrump()
