@@ -163,20 +163,6 @@ function writePoints()
     end
 end
 
-function setTextBids()
-  textBids = {}   -- create the matrix
-  for i = 1, numberOfPlayers do
-  -- for i = 1, 6 do
-      textBids[i] = {}     -- create a new row
-      for j = 1, 60 / numberOfPlayers do
-      -- for j = 1, 20 do
-          textBids[i][j] = textPointsOrigin.clone({
-            position     = {x = -19.68 + 2.34 * i, y = -4.1, z = 8.24 - 0.903 * j} --y-Koordinate ist ein Bug
-          })
-      end
-  end
-end
-
 function turnOnScoreboard()
   UI.setAttribute("Scoreboard", "active", "true")
 end

@@ -9,8 +9,10 @@ function ScoreTable:new()
 
     instance.pointblock = getObjectFromGUID(Constants.Guid.ScoreBoard.Pointblock)
     instance.textPlayer = {}
+
     instance.textPointsOrigin = getObjectFromGUID(Constants.Guid.ScoreBoard.TextPoint)
     instance.textPoints = {}
+    instance.textBids = {}
 
     instance:init()
 
@@ -30,6 +32,7 @@ end
 function ScoreTable:reset()
     self:writeHeadlines()
     self:initTextPoints()
+    self:initTextBids()
 end
 
 function ScoreTable:writeHeadlines()
@@ -56,6 +59,22 @@ function ScoreTable:initTextPoints()
             })
         end
     end
-  end
+end
+
+function ScoreTable:initTextBids()
+    self.textBids = {}   -- create the matrix
+    local numberOfPlayers = PlayerManager.getNumberOfPlayers()
+
+    for i = 1, numberOfPlayers do
+        -- for i = 1, 6 do
+            self.textBids[i] = {}     -- create a new row
+        for j = 1, 60 / numberOfPlayers do
+            -- for j = 1, 20 do
+                self.textBids[i][j] = self.textPointsOrigin.clone({
+                position     = {x = -19.68 + 2.34 * i, y = -4.1, z = 8.24 - 0.903 * j} --y-Koordinate ist ein Bug
+            })
+        end
+    end
+end
 
 return ScoreTable
