@@ -14,8 +14,6 @@ function Game:new()
     instance.board = Board:new()
     instance.scoreTable = ScoreTable:new()
     instance.scoreBoard = ScoreBoard:new()
-    instance.playerManager = PlayerManager:new()
-    instance.counterManager = CounterManager:new(instance.playerManager)
 
     instance.startPlayer = nil
 
@@ -25,13 +23,14 @@ function Game:new()
 end
 
 function Game:init()
+    CounterManager:init()
 end
 
 function Game:start()
-    if self.playerManager:setPlayerNumber() then
-        self.counterManager:destroyUnusedCounters()
+    if PlayerManager:setPlayerNumber() then
+        CounterManager:destroyUnusedCounters()
         self:setStartPlayer()
-        -- writePointblockHeadlines()
+        self.scoreTable:writeHeadlines()
         -- round = 0
         -- setPointsToZero()
         -- setTextPoints()
@@ -58,7 +57,7 @@ function Game:setTrump()
 end
 
 function Game:setStartPlayer()
-    self.startPlayer = self.playerManager:getRandomPlayer()
+    self.startPlayer = PlayerManager:getRandomPlayer()
     broadcastToAll(Player[self.startPlayer].steam_name.." is randomly chosen as starting player", self.startPlayer)
 end
 

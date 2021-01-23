@@ -163,19 +163,6 @@ function writePoints()
     end
 end
 
-function writePointblockHeadlines()
-    if numberOfPlayers < 6 then
-        for i = 6, numberOfPlayers + 1, -1 do
-            textPlayer[i].destruct()
-        end
-    end
-    for i = 1, numberOfPlayers, 1 do
-        --textPlayer[i].setValue(Player[playerList[startPlayerNumber % numberOfPlayers + i]].steam_name)
-        textPlayer[i].setValue(Player[playerList[i]].steam_name)
-    end
-
-end
-
 function setTextPoints()
   textPoints = {}   -- create the matrix
   for i = 1, numberOfPlayers do

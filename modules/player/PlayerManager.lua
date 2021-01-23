@@ -1,54 +1,45 @@
 local Constants = require "constants"
 local Helpers = require "helpers"
-local PlayerManager = {}
 
-function PlayerManager:new()
-    local instance = {}
-    self.__index = self
-    setmetatable(instance, self)
+local playersArray = {}
+local players = {}
+local numberOfPlayers = 0
 
-    instance.playersArray = {}
-    instance.players = {}
-    instance.numberOfPlayers = 0
+local PlayerManager = {
+    setPlayerNumber = function()
+        playersArray = getSeatedPlayers()
+        players = {}
 
-    instance:init()
+        for id, player in pairs(playersArray) do
+            players[player] = player
+        end
 
-    return instance
-end
+        numberOfPlayers = Helpers.getSize(players)
 
-function PlayerManager:init()
-end
+        if numberOfPlayers < Constants.Config.countPlayerMin or numberOfPlayers > Constants.Config.countPlayerMax then
+            broadcastToAll("Dieses Spiel ist nur für "..Constants.Config.countPlayerMin.."-"..Constants.Config.countPlayerMax.." Spieler!", "Red")
+            return false
+        end
 
-function PlayerManager:setPlayerNumber()
-    self.playersArray = getSeatedPlayers()
-    self.players = {}
-
-    for id, player in pairs(self.playersArray) do
-        self.players[player] = player
-    end
-
-    self.numberOfPlayers = Helpers.getSize(self.players)
-
-    if self.numberOfPlayers < Constants.Config.countPlayerMin or self.numberOfPlayers > Constants.Config.countPlayerMax then
-        broadcastToAll("Dieses Spiel ist nur für "..Constants.Config.countPlayerMin.."-"..Constants.Config.countPlayerMax.." Spieler!", "Red")
-        return false
-    end
-
-    broadcastToAll("You are playing with "..self.numberOfPlayers.." player(s)", "Green")
-    return true
-end
-
-function PlayerManager:getPlayers()
-    return self.players
-end
-
-function PlayerManager:getNumberOfPlayers()
-    return self.numberOfPlayers
-end
-
-function PlayerManager:getRandomPlayer()
-    local randomNumber = math.random(1, self:getNumberOfPlayers())
-    return self.playersArray[randomNumber]
-end
+        broadcastToAll("You are playing with "..numberOfPlayers.." player(s)", "Green")
+        return true
+    end,
+    getPlayers = function()
+        return players
+    end,
+    getPlayersArray = function()
+        return playersArray
+    end,
+    hasPlayer = function(player)
+        return players[player] ~= nil
+    end,
+    getNumberOfPlayers = function()
+        return numberOfPlayers
+    end,
+    getRandomPlayer = function()
+        local randomNumber = math.random(1, numberOfPlayers)
+        return playersArray[randomNumber]
+    end,
+}
 
 return PlayerManager
