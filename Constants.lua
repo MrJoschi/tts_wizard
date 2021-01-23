@@ -4,7 +4,7 @@ local Constants = {
         countPlayerMax = 6,
     },
     Guid = {
-        Board = {
+        Table = {
             Deck = "a92a97",
             DeckZone = "a09ba8",
             PlayZone = "aa5aa2",

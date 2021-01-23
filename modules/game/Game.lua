@@ -1,4 +1,4 @@
-local Board = require "modules.board.board"
+local Table = require "modules.table.table"
 local ScoreTable = require "modules.score.scoretable"
 local ScoreBoard = require "modules.score.scoreboard"
 local CounterManager = require "modules.counter.countermanager"
@@ -13,7 +13,7 @@ function Game:new()
     self.__index = self
     setmetatable(instance, self)
 
-    instance.board = Board:new()
+    instance.table = Table:new()
     instance.scoreTable = ScoreTable:new()
     instance.scoreBoard = ScoreBoard:new()
 
@@ -57,7 +57,7 @@ end
 
 function Game:startRound()
     self:initVariables()
-    local deck = getObjectFromGUID(Constants.Guid.Board.Deck)
+    local deck = getObjectFromGUID(Constants.Guid.Table.Deck)
     -- Deck wird gemischt und die erste Karte wird ausgeteilt
     deck.randomize()
     deck.deal(self.round)
@@ -147,7 +147,7 @@ end
 
 ---Trump
 function Game:setTrump()
-    local deckZoneObjects = self.board.deckZone.getObjects()
+    local deckZoneObjects = self.table.deckZone.getObjects()
 
     for _, item in ipairs(deckZoneObjects) do
         if item.tag == "Card" then

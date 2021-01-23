@@ -1,5 +1,5 @@
 local Game = require 'modules.game.Game'
-local Table = require 'modules.board.Board'
+local Table = require 'modules.table.Table'
 
 counterGUID = {
     White = "75b7a7",
