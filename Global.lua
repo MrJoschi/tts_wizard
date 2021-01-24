@@ -1,5 +1,5 @@
 local Game = require 'modules.game.Game'
-local Table = require 'modules.board.Board'
+--local Table = require 'modules.board.Board'
 
 deckGUID = "a92a97"
 deckZoneGUID = "a09ba8"
@@ -39,6 +39,8 @@ textPlayer = {}
 lastPlayer = false
 
 trump = nil
+
+handZoneObjects = {}
 
 --function onLoad()
 
@@ -305,13 +307,16 @@ end
 function startRound()
     setStartRoundVar()
     local deck = getObjectFromGUID(deckGUID)
-    -- Deck wird gemischt und die erste Karte wird ausgeteilt
     deck.randomize()
     deck.deal(round)
-    -- Die oberste Karte wird umgedreht und als Trumpf in Global definiert
     local deckPos = deck.getPosition()
-
-    deck.takeObject({flip = true, position = deckPos, callback_function = callbackFlippedCard} )
+    deck.takeObject({flip = true, position = deckPos, callback_function = callbackFlippedCard})
+    Wait.frames(function ()
+        for _, player in ipairs(playerList) do
+            handZoneObjects[player] = Player[player].getHandObjects()
+        end
+    end, 20)
+    
 end
 
 function setPointsToZero()
@@ -479,6 +484,24 @@ function lockPlayedCard(droppedCard)
     droppedCard.setLock(true)
     local position = droppedCard.getPosition()
     droppedCard.setPositionSmooth({position.x, 1, position.z}, true, false)
+end
+
+function getCardOwner(card)
+    for _, player in ipairs(playerList) do
+        for _, item in ipairs(handZoneObjects[player]) do
+            if item == card then
+                return player
+            end
+        end
+    end
+end
+
+function onObjectPickUp(playerPickedUp, pickedUpObject)
+    local cardOwner = getCardOwner(pickedUpObject)
+    if playerPickedUp ~= cardOwner then
+        pickedUpObject.deal(1,cardOwner)
+        broadcastToColor("Hands off from other handcards!", playerPickedUp, "Red")
+    end
 end
 
 function onObjectDrop(droppingPlayer, droppedCard)
