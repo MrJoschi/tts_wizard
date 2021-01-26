@@ -1,0 +1,14 @@
+<TableLayout id = "TrumpTable" active = "false" color="#282828" width="85" height="25" offsetXY = "-249 30" cellBackgroundColor="Black" cellPadding="4 4 4 3">
+    <Row>
+        <Cell>
+            <Text
+                id = "TrumpText"
+                text = ""
+                rotation = "0 0 180"
+                fontSize = "16"
+                color = "#FFFFFF"
+                alignment = "MiddleCenter">
+            </Text>
+        </Cell>
+    </Row>
+</TableLayout>

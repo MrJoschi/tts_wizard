@@ -96,15 +96,38 @@ function selectTrump()
     broadcastToAll(Player[playerList[previousPlayerNumber]].steam_name.." can decide which suit is trump this round!", "Red")
 end
 
+function writeTrump(trumpText)
+    local pointblock = getObjectFromGUID(pointblockGUID)
+    pointblock.UI.setAttribute("TrumpText", "text", trumpText)
+end
+
+function clearTrumpText()
+    local pointblock = getObjectFromGUID(pointblockGUID)
+    pointblock.UI.setAttribute("TrumpText", "text", "")
+end
+
 function interpretTrump()
+    local trumpText = nil
     if trump == nil then
-        logToAllOrHost("Fehler bei Ermittlung Trumpf", "Red")
+        logToAllOrHost("Trump determination failed", "Red")
+        trumpText = "Error"
     elseif trump == "N" then
         trump = "null"
+        trumpText = "No Trump"
     elseif trump == "Z" then
-            waitForSelectTrump = true
-            selectTrump()
-    end
+        waitForSelectTrump = true
+        trumpText = "Selecting..."
+        selectTrump()
+    elseif trump =="c" then
+        trumpText = "Diamonds"
+    elseif trump =="k" then
+        trumpText = "Clubs"
+    elseif trump =="h" then
+        trumpText = "Hearts"
+    elseif trump =="p" then
+        trumpText = "Spades"
+    end 
+    writeTrump(trumpText)
 end
 
 -- function setTrump()
@@ -271,6 +294,11 @@ function setTextBids()
   end
 end
 
+function turnOnTrumpText()
+    local pointblock = getObjectFromGUID(pointblockGUID)
+    pointblock.UI.setAttribute("TrumpTable", "active", true)
+end
+
 function turnOnScoreboard()
   UI.setAttribute("Scoreboard", "active", "true")
 end
@@ -292,6 +320,7 @@ function setupTheGame()
     setTextBids()
     turnOnTurnScreen()
     turnOnScoreboard()
+    turnOnTrumpText()
     writeScoreboard()
     startRound()
 end
@@ -336,6 +365,7 @@ function countPoints()
 end
 
 function collectCards()
+    clearTrumpText()
     local allObjects = getAllObjects()
     local allCards = {}
     for _, item in ipairs(allObjects) do
@@ -632,6 +662,7 @@ function onChat(message, player)
             if message == "h" or message == "p" or message == "k" or message == "c" then
                 trump = message
                 broadcastToAll(trump.." is defined as trump", "Red")
+                interpretTrump()
                 waitForSelectTrump = false
             end
         end
