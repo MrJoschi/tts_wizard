@@ -6,63 +6,71 @@
     <Row dontUseTableRowBackground="true" preferredHeight="40" active="true"/>
 </Defaults>
 
-<!-- <VerticalLayout
-  Height = "200">
-    <Text color = "Black" id = "ScoreboardPlayer1" text = ""></Text>
-    <Text color = "Black" id = "ScoreboardPlayer2" text = ""></Text>
-    <Text color = "Black" id = "ScoreboardPlayer3" text = ""></Text>
-    <Text color = "Black" id = "ScoreboardPlayer4" text = ""></Text>
-    <Text color = "Black" id = "ScoreboardPlayer5" text = ""></Text>
-    <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
-</VerticalLayout> -->
-
-<TableLayout id="ScoreBoard" width="200" RectAlignment="MiddleRight" offsetXY="-5 0" columnWidths="0 50" Height="240" active="false" cellPadding="10 10 0 0"> 
-    <Row>
+<TableLayout id="ScoreBoard" width="230" RectAlignment="MiddleRight" offsetXY="-5 0" columnWidths="0 50 30" Height="240" active="false" cellPadding="10 10 0 0"> 
+    <Row id="ScoreboardRow1">
         <Cell> 
             <Text alignment = "MiddleLeft" id = "ScoreboardPlayer1" text = ""></Text>
         </Cell>
         <Cell>
-            <Text color = "Black" id = "ScoreboardPoints1" text = ""></Text>
+            <Text id = "ScoreboardPoints1" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text id = "ScoreboardBids1" text = ""></Text>
         </Cell>
     </Row>
-    <Row>
+    <Row id="ScoreboardRow2">
         <Cell>
-            <Text color = "Black" id = "ScoreboardPlayer2" text = ""></Text>
+            <Text alignment = "MiddleLeft" id = "ScoreboardPlayer2" text = ""></Text>
         </Cell>
         <Cell>
-            <Text color = "Black" id = "ScoreboardPoints2" text = ""></Text>
-        </Cell>
-      </Row>
-      <Row>
-        <Cell>
-            <Text color = "Black" id = "ScoreboardPlayer3" text = ""></Text>
+            <Text id = "ScoreboardPoints2" text = ""></Text>
         </Cell>
         <Cell>
-            <Text color = "Black" id = "ScoreboardPoints3" text = ""></Text>
+            <Text id = "ScoreboardBids2" text = ""></Text>
         </Cell>
       </Row>
-      <Row>
+      <Row id="ScoreboardRow3">
         <Cell>
-            <Text color = "Black" id = "ScoreboardPlayer4" text = ""></Text>
+            <Text alignment = "MiddleLeft" id = "ScoreboardPlayer3" text = ""></Text>
         </Cell>
         <Cell>
-            <Text color = "Black" id = "ScoreboardPoints4" text = ""></Text>
-        </Cell>
-      </Row>
-      <Row>
-        <Cell>
-            <Text color = "Black" id = "ScoreboardPlayer5" text = ""></Text>
+            <Text id = "ScoreboardPoints3" text = ""></Text>
         </Cell>
         <Cell>
-            <Text color = "Black" id = "ScoreboardPoints5" text = ""></Text>
+            <Text id = "ScoreboardBids3" text = ""></Text>
         </Cell>
       </Row>
-      <Row>
+      <Row id="ScoreboardRow4">
         <Cell>
-            <Text color = "Black" id = "ScoreboardPlayer6" text = ""></Text>
+            <Text alignment = "MiddleLeft" id = "ScoreboardPlayer4" text = ""></Text>
         </Cell>
         <Cell>
-            <Text color = "Black" id = "ScoreboardPoints6" text = ""></Text>
+            <Text id = "ScoreboardPoints4" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text id = "ScoreboardBids4" text = ""></Text>
+        </Cell>
+      </Row>
+      <Row id="ScoreboardRow5">
+        <Cell>
+            <Text alignment = "MiddleLeft" id = "ScoreboardPlayer5" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text id = "ScoreboardPoints5" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text id = "ScoreboardBids5" text = ""></Text>
+        </Cell>
+      </Row>
+      <Row id="ScoreboardRow6">
+        <Cell>
+            <Text alignment = "MiddleLeft" id = "ScoreboardPlayer6" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text id = "ScoreboardPoints6" text = ""></Text>
+        </Cell>
+        <Cell>
+            <Text id = "ScoreboardBids6" text = ""></Text>
         </Cell>
     </Row>
 </TableLayout>

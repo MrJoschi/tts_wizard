@@ -30,6 +30,8 @@ textPointsGUID = "65e97f"
 pointblockGUID = "2d4bf2"
 
 logToAll = true
+startRoundAt = 3 --muss kleiner als maxRounds sein
+maxRounds = 5   --60 / numberOfPlayers
 minPlayerNumber = 1
 tricks = {}
 points = {}
@@ -228,6 +230,7 @@ function bid(counterParameters)
                         end
                     end
                     textBids[activePlayerNumber][round].setValue(tostring(bids[activePlayerNumber]))
+                    UI.setAttributes("ScoreboardBids"..activePlayerNumber, {color = playerList[activePlayerNumber], text = bids[activePlayerNumber]})
                     nextActivePlayer()
                 end
             end
@@ -250,7 +253,7 @@ end
 function writePoints()
     for i = 1, numberOfPlayers, 1 do
         textPoints[i][round].setValue(tostring(points[i]))
-        UI.setAttribute("ScoreboardPlayer"..i, "text", Player[playerList[i]].steam_name..": "..points[i])
+        UI.setAttribute("ScoreboardPoints"..i, "text", points[i])
     end
 end
 
@@ -300,10 +303,14 @@ function turnOnTrumpText()
 end
 
 function turnOnScoreboard()
-  UI.setAttribute("Scoreboard", "active", "true")
+    UI.setAttribute("Scoreboard", "active", "true")
 end
 
 function writeScoreboard()
+    for i = 6, numberOfPlayers, -1 do
+        UI.setAttribute("ScorboardRow"..i, "active", false)
+    end
+    UI.setAttribute("Scoreboard", "Height", 40 * numberOfPlayers)
     for i = 1, numberOfPlayers, 1 do
         UI.setAttributes("ScoreboardPlayer"..i, {color = playerList[i], text = Player[playerList[i]].steam_name})
         UI.setAttributes("ScoreboardPoints"..i, {color = playerList[i], text = points[i]})
@@ -314,7 +321,7 @@ function setupTheGame()
     prepareCounters()
     randomStartPlayer()
     writePointblockHeadlines()
-    round = 0
+    round = startRoundAt - 1
     setPointsToZero()
     setTextPoints()
     setTextBids()
@@ -364,8 +371,15 @@ function countPoints()
   end
 end
 
+function clearScoreboardBids()
+    for i = 1, numberOfPlayers, 1 do
+        UI.setAttribute("ScoreboardBids"..i, "text", "")
+    end
+end
+
 function collectCards()
     clearTrumpText()
+    clearScoreboardBids()
     local allObjects = getAllObjects()
     local allCards = {}
     for _, item in ipairs(allObjects) do
@@ -403,7 +417,7 @@ function endGame()
 end
 
 function resetDeck()
-    if round == 60 / numberOfPlayers then
+    if round == maxRounds then
         endGame()
     else
         deck.setPositionSmooth({x=0,y=1,z=0}, false, false)
@@ -440,7 +454,7 @@ function endTrick()
                 end
             end
         end
-    end, 1)
+    end, 1)   
     startPlayerTrick = bestCardPlayer
     activePlayer = bestCardPlayer
     activePlayerNumber = bestCardPlayerNumber
@@ -460,7 +474,7 @@ function nextActivePlayer()
                 bidRound = false
                 printTurn(activePlayer)
             else
-                endTrick()
+                Wait.time(endTrick, 2)
             end
         else
             printTurn(activePlayer)
@@ -589,7 +603,11 @@ function onObjectDrop(droppingPlayer, droppedCard)
                             --Wenn bedient wird
                             if suit == suitToFollow then
                                 lockPlayedCard(droppedCard)
-                                if bestCard.getName() ~= trump and betterValue(droppedCard) == true then
+                                --Wenn Trumpf bedient wird
+                                if suit == trump and betterValue(droppedCard) == true then
+                                    setBest(droppingPlayer, droppedCard)
+                                --Wenn zwischendurch nicht gestochen wurde
+                                elseif bestCard.getName() ~= trump and betterValue(droppedCard) == true then
                                     setBest(droppingPlayer, droppedCard)
                                 end
                                 nextActivePlayer()
