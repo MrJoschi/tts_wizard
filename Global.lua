@@ -30,8 +30,8 @@ textPointsGUID = "65e97f"
 pointblockGUID = "2d4bf2"
 
 logToAll = true
-startRoundAt = 3 --muss kleiner als maxRounds sein
-maxRounds = 5   --60 / numberOfPlayers
+startRoundAt = 1 --muss kleiner als maxRounds sein
+maxRounds = 10   --60 / numberOfPlayers
 minPlayerNumber = 1
 tricks = {}
 points = {}
@@ -44,32 +44,6 @@ trump = nil
 
 handZoneObjects = {}
 
---function onLoad()
-
--- <button
---     onClick="bid"
---     position="0 22 -24"
---     width="50"
---     height="20"
---     fontSize="17">
---     Bid
--- </button>
---
---     params = {
---         click_function = "bidButtonReturn",
---         --function_owner = self,
---         label          = "Bid",
---         position       = {0, 22, -24},
---         --rotation       = {0, 180, 0},
---         width          = 50,
---         height         = 20,
---         font_size      = 17,
---         --color          = {0.5, 0.5, 0.5},
---         --font_color     = {1, 1, 1},
---         tooltip        = "This text appears on mouseover.",
---     }
---     buttonObject.createButton(params)
--- end
 local game = nil
 function onLoad()
     game = Game:new()
@@ -90,12 +64,33 @@ function onLoad()
     end
 end
 
+function trumpSelected(player, selectedTrump)
+    trump = selectedTrump
+    hideTrumpSelectButtons()
+    --broadcastToAll(trump.." is defined as trump", "Red")
+    interpretTrump()
+    waitForSelectTrump = false
+end
+
+function hideTrumpSelectButtons()
+    for i = 1, 4, 1 do
+        UI.setAttribute("trumpSelectButton"..i, "visibility", "nil")
+    end 
+end
+
+function showTrumpSelectButtons(previousPlayerNumber)
+    for i = 1, 4, 1 do
+        UI.setAttributes("trumpSelectButton"..i, {visibility = playerList[previousPlayerNumber], textColor = "#FFFFFF"})
+    end 
+end
+
 function selectTrump()
     local previousPlayerNumber = startPlayerNumber - 1
     if previousPlayerNumber == 0 then
        previousPlayerNumber = numberOfPlayers
     end
     broadcastToAll(Player[playerList[previousPlayerNumber]].steam_name.." can decide which suit is trump this round!", "Red")
+    showTrumpSelectButtons(previousPlayerNumber)  
 end
 
 function writeTrump(trumpText)
@@ -671,18 +666,5 @@ function printTurn(player)
 end
 
 function onChat(message, player)
-    if waitForSelectTrump == true then
-        local previousPlayerNumber = startPlayerNumber - 1
-        if previousPlayerNumber == 0 then
-           previousPlayerNumber = numberOfPlayers
-        end
-        if player.color == playerList[previousPlayerNumber] then
-            if message == "h" or message == "p" or message == "k" or message == "c" then
-                trump = message
-                broadcastToAll(trump.." is defined as trump", "Red")
-                interpretTrump()
-                waitForSelectTrump = false
-            end
-        end
-    end
+    --selectTrump()
 end

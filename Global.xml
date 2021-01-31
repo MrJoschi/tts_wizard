@@ -4,6 +4,7 @@
     <Text fontSize = "20" fontStyle = "Bold" alignment = "MiddleCenter"/>
     <TableLayout width="300" height="40" RectAlignment="UpperCenter" offsetXY="0 -80" color="#282828" cellBackgroundColor="Black"/>
     <Row dontUseTableRowBackground="true" preferredHeight="40" active="true"/>
+    <button width="300" height="100" fontSize="30" colors="#282828|#c8329b|#282828|#282828" textColor="#FFFFFF" visibility="nil" outline="Black" />
 </Defaults>
 
 <TableLayout id="ScoreBoard" width="230" RectAlignment="MiddleRight" offsetXY="-5 0" columnWidths="0 50 30" Height="240" active="false" cellPadding="10 10 0 0"> 
@@ -85,3 +86,28 @@
         </Cell>
     </Row>
 </TableLayout>
+
+<button
+    onClick="trumpSelected(c)"
+    position="-525 200 0"
+    id="trumpSelectButton1">
+    Diamonds
+</button>
+<button
+    onClick="trumpSelected(h)"
+    position="-175 200 0"
+    id="trumpSelectButton2">
+    Hearts
+</button>
+<button
+    onClick="trumpSelected(p)"
+    position="175 200 0"
+    id="trumpSelectButton3">
+    Spades
+</button>
+<button
+    onClick="trumpSelected(k)"
+    position="525 200 0"
+    id="trumpSelectButton4">
+    Clubs
+</button>
